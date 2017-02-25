@@ -1,0 +1,4 @@
+name: CVChat
+main: org.cubeville.cvchat.CVChat
+version: 0.1
+author: FrediW

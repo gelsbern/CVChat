@@ -6,6 +6,9 @@ import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import org.cubeville.cvchat.channels.Channel;
+import org.cubeville.cvchat.log.Logger;
+
 public class ChatListener implements Listener {
 
     Channel localChannel;
@@ -16,6 +19,11 @@ public class ChatListener implements Listener {
     
     @EventHandler
     public void onChat(final ChatEvent event) {
+        String name;
+        if(event.getSender() instanceof ProxiedPlayer) name = ((ProxiedPlayer) event.getSender()).getDisplayName();
+        else name = "Console";
+        Logger.getInstance().logWithHeader(name + ": " + event.getMessage());
+        
         if (event.isCancelled()) return;
         if (event.isCommand()) return;
         if (!(event.getSender() instanceof ProxiedPlayer)) return;

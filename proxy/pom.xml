@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <groupId>org.cubeville</groupId>
+  <groupId>org.cubeville.proxy</groupId>
   <artifactId>CVChat</artifactId>
   <version>0.1</version>
 
@@ -19,6 +19,18 @@
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-config</artifactId>
       <version>1.11-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>codecrafter47.bungeetablistplus</groupId>
+      <artifactId>bungeetablistplus-api-bungee</artifactId>
+      <version>2.7.3-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>codecrafter47.bungeetablistplus</groupId>
+      <artifactId>bungee-plugin</artifactId>
+      <version>2.7.3-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

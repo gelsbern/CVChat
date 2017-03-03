@@ -3,33 +3,52 @@ package org.cubeville.cvchat;
 import java.util.Collection;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
-public class LoginListener implements Listener {
+import org.cubeville.cvchat.channels.Channel;
+import org.cubeville.cvchat.channels.ChannelManager;
 
-    private Collection<Channel> channels;
-
-    public LoginListener(Collection<Channel> channels) {
-        this.channels = channels;
+public class LoginListener implements Listener
+{
+    ChannelManager channelManager;
+    
+    public LoginListener(ChannelManager channelManager) {
+        this.channelManager = channelManager;
     }
 
     @EventHandler
     public void onPostLogin(final PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
-        for(Channel channel: channels) {
-            channel.playerLogin(player);
+        channelManager.playerLogin(player);
+        if(!player.hasPermission("cvchat.silentjoin")) {
+            sendMessage(player.getDisplayName(), "joined");
+        }
+        else {
+            System.out.println(player.getDisplayName() + " joining silently.");
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
-        for(Channel channel: channels) {
-            channel.playerDisconnect(player);
+        channelManager.playerDisconnect(player);
+        if(!player.hasPermission("cvchat.silentleave")) {
+            sendMessage(player.getDisplayName(), "left");
+        }
+        else {
+            System.out.println(player.getDisplayName() + " disconnecting silently.");
+        }
+    }
+
+    private void sendMessage(String playerName, String status) {
+        for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
+            p.sendMessage("§e" + playerName + "§e " + status + " the game. (cvchat)");
         }
     }
 }

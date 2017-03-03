@@ -4,8 +4,9 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-import org.cubeville.cvchat.Channel;
 import org.cubeville.cvchat.Util;
+
+import org.cubeville.cvchat.channels.Channel;
 
 public class ChatCommand extends Command
 {

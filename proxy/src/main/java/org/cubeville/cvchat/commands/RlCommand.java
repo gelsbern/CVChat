@@ -8,34 +8,31 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-public class RsCommand extends Command
+import org.cubeville.cvchat.sanctions.SanctionManager;
+
+public class RlCommand extends CommandBase
 {
-    public RsCommand() {
-        super("rs");
+    public RlCommand() {
+        super("rl");
+        setUsage("§c/rl <message...>");
     }
 
     public void execute(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
 
-        if(args.length < 1) {
-            sender.sendMessage("§cToo few arguments.");
-            sender.sendMessage("§c/rs <message...>");
-            return;
-        }
+        if(!verifyNotLessArguments(sender, args, 1)) return;
 
         UUID recipientId = MsgCommand.getLastMessageSent(sender.getUniqueId());
-        if (recipientId == null) {
-            sender.sendMessage("§cNo message sent yet.");
-            return;
-        }
+        if(!verify(sender, recipientId != null, "§cNo message sent yet."));
 
         ProxiedPlayer recipient = ProxyServer.getInstance().getPlayer(recipientId);
-        if(recipient == null) {
-            sender.sendMessage("§cPlayer left.");
-            return;
-        }
+        if(!verify(sender, recipient != null, "§cPlayer left."));
 
+        if(SanctionManager.getInstance().isPlayerMuted(sender)) {
+            if(!verify(sender, recipient.hasPermission("cvchat.mute.staff"), "§cYou are muted. You can only send messages to staff members.")) return;
+        }
+        
         MsgCommand.sendMessage(sender, recipient, args, 0);
     }
 }

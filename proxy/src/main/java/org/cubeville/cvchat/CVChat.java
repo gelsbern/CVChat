@@ -2,10 +2,6 @@ package org.cubeville.cvchat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import net.md_5.bungee.api.ProxyServer;
@@ -22,15 +18,20 @@ import org.cubeville.cvchat.channels.GroupChannel;
 import org.cubeville.cvchat.commands.ChannelCommand;
 import org.cubeville.cvchat.commands.ChatCommand;
 import org.cubeville.cvchat.commands.GroupCommand;
-import org.cubeville.cvchat.commands.HelpCommand;
+import org.cubeville.cvchat.commands.KickCommand;
 import org.cubeville.cvchat.commands.MsgCommand;
+import org.cubeville.cvchat.commands.MuteCommand;
 import org.cubeville.cvchat.commands.RCommand;
-import org.cubeville.cvchat.commands.RsCommand;
+import org.cubeville.cvchat.commands.RlCommand;
 import org.cubeville.cvchat.commands.TestCommand;
-
-import org.cubeville.cvchat.postfix.PostfixManager;
+import org.cubeville.cvchat.commands.UnmuteCommand;
+import org.cubeville.cvchat.commands.WhoCommand;
 
 import org.cubeville.cvchat.log.Logger;
+
+import org.cubeville.cvchat.ranks.RankManager;
+
+import org.cubeville.cvchat.sanctions.SanctionManager;
 
 // TODO: Muting players, muting complete chat except staff
 // TODO: Private messaging with afk function :)
@@ -39,8 +40,10 @@ import org.cubeville.cvchat.log.Logger;
 public class CVChat extends Plugin {
 
     private ChannelManager channelManager;
-    private Logger logger;
+    private SanctionManager sanctionManager;
     
+    private Logger logger;
+
     private static CVChat instance;
     public static CVChat getInstance() {
         return instance;
@@ -88,9 +91,12 @@ public class CVChat extends Plugin {
             pm.registerListener(this, new LoginListener(channelManager));
             pm.registerCommand(this, new ChannelCommand(channelManager));
 
-            // Load postfix configuration
-            Configuration postfixList = (Configuration) config.get("postfix");
-            PostfixManager postfixManager = new PostfixManager(postfixList);
+            // Load ranks configuration
+            Configuration ranksList = (Configuration) config.get("ranks");
+            RankManager rankManager = new RankManager(ranksList);
+
+            // Load swear filter words 
+            sanctionManager = new SanctionManager(config.getStringList("filter"));
         }
         catch (IOException e) {
             System.out.println("Fatal error: CVChat config file not found or readable!");
@@ -99,9 +105,18 @@ public class CVChat extends Plugin {
         // Initialize private message chat commands
         pm.registerCommand(this, new MsgCommand());
         pm.registerCommand(this, new RCommand());
-        pm.registerCommand(this, new RsCommand());
+        pm.registerCommand(this, new RlCommand());
 
+        // Sanction commands
+        pm.registerCommand(this, new KickCommand());
+        pm.registerCommand(this, new MuteCommand());
+        pm.registerCommand(this, new UnmuteCommand());
+
+        // Player list command
+        pm.registerCommand(this, new WhoCommand());
+        
+        // Little helper command, remove when done! TODO
         pm.registerCommand(this, new TestCommand());
-    }
 
+    }
 }

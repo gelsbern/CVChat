@@ -7,10 +7,11 @@ import java.util.UUID;
 
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.CommandSender;
 
 import org.cubeville.cvchat.Util;
-
-import org.cubeville.cvchat.postfix.PostfixManager;
+import org.cubeville.cvchat.ranks.RankManager;
+import org.cubeville.cvchat.sanctions.SanctionManager;
 
 public class Channel
 {
@@ -23,11 +24,12 @@ public class Channel
     private boolean isDefault; // Channel is activated for new players
     private boolean autojoin; // Players join automatically when they log in (otherwise serialized)
     private boolean listable; // Shows up in /ch list
+    private boolean filtered;
     private Collection<String> commands;
     
     Set<UUID> members;
     
-    public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, Collection<String> commands) {
+    public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
         this.name = name;
         this.viewPermission = viewPermission;
         this.sendPermission = sendPermission;
@@ -37,6 +39,7 @@ public class Channel
         this.isDefault = isDefault;
         this.autojoin = autojoin;
         this.listable = listable;
+        this.filtered = filtered;
         this.commands = commands;
         
         members = new HashSet<>();
@@ -65,15 +68,23 @@ public class Channel
         members.remove(player.getUniqueId());
     }
     
-    public void sendMessage(ProxiedPlayer player, String message) {
+    public void sendMessage(CommandSender player, String message) {
+        if(SanctionManager.getInstance().isPlayerMuted(player)) {
+            player.sendMessage("§cYou are muted.");
+            return;
+        }
+        
         if(((!sendPermission.equals("default")) && player.hasPermission(sendPermission) == false) || ((!viewPermission.equals("default")) && player.hasPermission(viewPermission) == false)) {
             player.sendMessage("§cPermission denied.");
             return;
         }
-        if(!members.contains(player.getUniqueId())) {
-            player.sendMessage("§cYou're currently not a member of this channel. Join with /ch join " + name + ".");
-            return;
+        if(player instanceof ProxiedPlayer) {
+            if(!members.contains(((ProxiedPlayer) player).getUniqueId())) {
+                player.sendMessage("§cYou're currently not a member of this channel. Join with /ch join " + name + ".");
+                return;
+            }
         }
+        
         String formattedMessage = format;
 
         message.replace("§", "");
@@ -84,10 +95,20 @@ public class Channel
         formattedMessage = formattedMessage.replace("%message%", message);
         formattedMessage = formattedMessage.replace("%prefix%", "");
         if(formattedMessage.indexOf("%postfix%") > 0) {
-            String postfix = PostfixManager.getInstance().getPostfix(player);
-            formattedMessage = formattedMessage.replace("%postfix%", postfix);
+            if(player instanceof ProxiedPlayer) {
+                String postfix = RankManager.getInstance().getPostfix(player);
+                formattedMessage = formattedMessage.replace("%postfix%", postfix);
+            }
+            else {
+                formattedMessage = formattedMessage.replace("%postfix%", "CO");
+            }
         }
-        formattedMessage = formattedMessage.replace("%player%", player.getDisplayName());
+        if(player instanceof ProxiedPlayer) {
+            formattedMessage = formattedMessage.replace("%player%", ((ProxiedPlayer) player).getDisplayName());
+        }
+        else {
+            formattedMessage = formattedMessage.replace("%player%", "Console");
+        }
         Collection<ProxiedPlayer> recipientList = getRecipientList(player);
         if(recipientList == null) {
             sendFailureMessage(player);
@@ -100,11 +121,11 @@ public class Channel
         }
     }
 
-    protected Collection<ProxiedPlayer> getRecipientList(ProxiedPlayer player) {
+    protected Collection<ProxiedPlayer> getRecipientList(CommandSender player) {
         return ProxyServer.getInstance().getPlayers();
     }
 
-    protected void sendFailureMessage(ProxiedPlayer player) {
+    protected void sendFailureMessage(CommandSender player) {
         player.sendMessage("§cNobody hears your message.");
     }
     

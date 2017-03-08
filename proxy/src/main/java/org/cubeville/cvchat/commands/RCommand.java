@@ -7,6 +7,8 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
+import org.cubeville.cvchat.sanctions.SanctionManager;
+
 public class RCommand extends Command
 {
     public RCommand() {
@@ -33,6 +35,13 @@ public class RCommand extends Command
         if(recipient == null) {
             sender.sendMessage("§cPlayer left.");
             return;
+        }
+
+        if(SanctionManager.getInstance().isPlayerMuted(sender)) {
+            if(!recipient.hasPermission("cvchat.mute.staff")) {
+                sender.sendMessage("§cYou are muted. You can only send private messages to staff members.");
+                return;
+            }
         }
 
         MsgCommand.sendMessage(sender, recipient, args, 0);

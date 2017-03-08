@@ -1,12 +1,12 @@
-package org.cubeville.cvchat.postfix;
+package org.cubeville.cvchat.ranks;
 
-public class Postfix
+public class Rank
 {
     private String postfix;
     private String permission;
     private int priority;
-    
-    public Postfix(String postfix, String permission, int priority) {
+
+    public Rank(String postfix, String permission, int priority) {
         this.postfix = postfix;
         this.permission = permission;
         this.priority = priority;

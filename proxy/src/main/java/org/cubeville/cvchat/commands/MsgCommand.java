@@ -10,14 +10,16 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import org.cubeville.cvchat.Util;
+import org.cubeville.cvchat.sanctions.SanctionManager;
 
-public class MsgCommand extends Command
+public class MsgCommand extends CommandBase
 {
     private static Map<UUID, UUID> lastMessageReceived;
     private static Map<UUID, UUID> lastMessageSent;
     
     public MsgCommand() {
         super("msg");
+        setUsage("§c/msg <target> <message...>");
         lastMessageReceived = new HashMap<>();
         lastMessageSent = new HashMap<>();
     }
@@ -26,18 +28,18 @@ public class MsgCommand extends Command
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
 
-        if(args.length < 2) {
-            sender.sendMessage("§cToo few arguments.");
-            sender.sendMessage("§c/msg <target> <message...>");
-            return;
-        }
+        if(!verifyNotLessArguments(sender, args, 2)) return;
 
-        ProxiedPlayer recipient = ProxyServer.getInstance().getPlayer(args[0]);
-        if(recipient == null) {
-            sender.sendMessage("§cNo player found!");
-            return;
-        }
+        if(!verifyOnline(sender, args[0])) return;
+        ProxiedPlayer recipient = getPlayer(args[0]);
 
+        if(SanctionManager.getInstance().isPlayerMuted(sender)) {
+            if(!recipient.hasPermission("cvchat.mute.staff")) {
+                sender.sendMessage("§cYou are muted. You can only send messages to staff members.");
+                return;
+            }
+        }
+        
         sendMessage(sender, recipient, args, 1);
     }
 

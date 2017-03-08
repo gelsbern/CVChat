@@ -21,9 +21,8 @@ public class ChannelManager
     private File statusFolder;
 
     Channel localChannel; // TODO: no no no no
-    
-    private static ChannelManager instance;
 
+    private static ChannelManager instance;
     public static ChannelManager getInstance() {
         return instance;
     }
@@ -49,6 +48,7 @@ public class ChannelManager
                                           channelConfig.getBoolean("default"),
                                           channelConfig.getBoolean("autojoin"),
                                           channelConfig.getBoolean("listable"),
+                                          channelConfig.getBoolean("filtered"),
                                           (List<String>) channelConfig.getList("commands"));
             channels.put(channelName, channel);
             if(type.equals("local")) localChannel = channel;

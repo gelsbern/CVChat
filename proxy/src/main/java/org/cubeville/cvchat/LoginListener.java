@@ -1,8 +1,5 @@
 package org.cubeville.cvchat;
 
-import java.util.Collection;
-
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -11,7 +8,6 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import org.cubeville.cvchat.channels.Channel;
 import org.cubeville.cvchat.channels.ChannelManager;
 
 public class LoginListener implements Listener
@@ -22,15 +18,12 @@ public class LoginListener implements Listener
         this.channelManager = channelManager;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostLogin(final PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
         channelManager.playerLogin(player);
         if(!player.hasPermission("cvchat.silentjoin")) {
             sendMessage(player.getDisplayName(), "joined");
-        }
-        else {
-            System.out.println(player.getDisplayName() + " joining silently.");
         }
     }
 
@@ -40,9 +33,6 @@ public class LoginListener implements Listener
         channelManager.playerDisconnect(player);
         if(!player.hasPermission("cvchat.silentleave")) {
             sendMessage(player.getDisplayName(), "left");
-        }
-        else {
-            System.out.println(player.getDisplayName() + " disconnecting silently.");
         }
     }
 

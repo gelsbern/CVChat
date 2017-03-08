@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import codecrafter47.bungeetablistplus.BungeeTabListPlus;
@@ -98,6 +99,16 @@ public class Util
     }
 
     public static boolean playerIsHidden(ProxiedPlayer player) {
-        return (BungeeTabListPlus.isHidden(BungeeTabListPlus.getInstance().getConnectedPlayerManager().getPlayer(sender)));
+        return (BungeeTabListPlus.isHidden(BungeeTabListPlus.getInstance().getConnectedPlayerManager().getPlayer(player)));
+    }
+
+    public static List<ProxiedPlayer> getPlayersWithPermission(String permission) {
+        List<ProxiedPlayer> ret = new ArrayList<>();
+        for(ProxiedPlayer player: ProxyServer.getInstance().getPlayers()) {
+            if(player.hasPermission(permission)) {
+                ret.add(player);
+            }
+        }
+        return ret;
     }
 }

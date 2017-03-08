@@ -18,8 +18,7 @@ public class ChatCommand extends Command
     }
 
     public void execute(CommandSender commandSender, String[] args) {
-        if(!(commandSender instanceof ProxiedPlayer)) return; // TODO: Let console chat?
         String message = Util.removeSectionSigns(Util.joinStrings(args, 0));
-        channel.sendMessage((ProxiedPlayer) commandSender, message);
+        channel.sendMessage(commandSender, message);
     }
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -20,8 +21,8 @@ public class GroupChannel extends Channel
     private static Map<UUID, Set<UUID>> groupMembers;    // Key = group, value = player
     private static Map<UUID, UUID> invitations; // Key = invited player, value = inviting player
     
-    public GroupChannel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, Collection<String> commands) {
-        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, commands);
+    public GroupChannel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
+        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, filtered, commands);
 
         groupMembership = new HashMap<>();
         groupMembers = new HashMap<>();
@@ -80,7 +81,11 @@ public class GroupChannel extends Channel
         }
     }
 
-    protected Collection<ProxiedPlayer> getRecipientList(ProxiedPlayer player) {
+    protected Collection<ProxiedPlayer> getRecipientList(CommandSender sender) {
+        if(!(sender instanceof ProxiedPlayer)) {
+            return new ArrayList<>();
+        }
+        ProxiedPlayer player = (ProxiedPlayer) sender;
         UUID group = groupMembership.get(player.getUniqueId());
         if(group == null) return null;
         List<ProxiedPlayer> members = new ArrayList<>();
@@ -90,7 +95,7 @@ public class GroupChannel extends Channel
         return members;
     }
 
-    protected void sendFailureMessage(ProxiedPlayer player) {
+    protected void sendFailureMessage(CommandSender player) {
         player.sendMessage("§cYou're not member of a group.");
     }
 

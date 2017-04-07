@@ -1,0 +1,9 @@
+name: CVChat
+main: org.cubeville.cvchat.CVChat
+authors: [FrediW]
+version: 0.1
+depend: [CVIPC]
+
+commands:
+  modreq:
+    description: Send moderator request

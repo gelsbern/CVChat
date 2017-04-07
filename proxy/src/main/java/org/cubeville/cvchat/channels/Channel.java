@@ -1,8 +1,11 @@
 package org.cubeville.cvchat.channels;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 import net.md_5.bungee.api.ProxyServer;
@@ -27,8 +30,11 @@ public class Channel
     private boolean filtered;
     private Collection<String> commands;
     
-    Set<UUID> members;
-    
+    private Set<UUID> members;
+
+    private Map<Integer, String> messageQueue;
+    private Integer messageQueueId;
+        
     public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
         this.name = name;
         this.viewPermission = viewPermission;
@@ -43,6 +49,9 @@ public class Channel
         this.commands = commands;
         
         members = new HashSet<>();
+
+        messageQueue = new HashMap<>();
+        messageQueueId = 0;
     }
 
     public void playerLogin(ProxiedPlayer player, String configuration) {
@@ -84,7 +93,7 @@ public class Channel
                 return;
             }
         }
-        
+
         String formattedMessage = format;
 
         message.replace("§", "");
@@ -94,13 +103,13 @@ public class Channel
         // TODO: Strip paragraph chars, convert colours if has permission to do so
         formattedMessage = formattedMessage.replace("%message%", message);
         formattedMessage = formattedMessage.replace("%prefix%", "");
-        if(formattedMessage.indexOf("%postfix%") > 0) {
+        if(formattedMessage.indexOf("%postfix%") >= 0) {
             if(player instanceof ProxiedPlayer) {
                 String postfix = RankManager.getInstance().getPostfix(player);
                 formattedMessage = formattedMessage.replace("%postfix%", postfix);
             }
             else {
-                formattedMessage = formattedMessage.replace("%postfix%", "CO");
+                formattedMessage = formattedMessage.replace("%postfix%", "(§dCO§f)");
             }
         }
         if(player instanceof ProxiedPlayer) {
@@ -109,9 +118,60 @@ public class Channel
         else {
             formattedMessage = formattedMessage.replace("%player%", "Console");
         }
-        Collection<ProxiedPlayer> recipientList = getRecipientList(player);
+
+        if(formattedMessage.indexOf("%health%") >= 0) {
+            if(player instanceof ProxiedPlayer) {
+                ProxiedPlayer p = (ProxiedPlayer) player;
+                messageQueueId++;
+                messageQueue.put(messageQueueId, p.getUniqueId().toString() + "|" + formattedMessage);
+                ChannelManager.getInstance().getIPC()
+                    .sendMessage(p.getServer().getInfo().getName(),
+                                 "chatquery" + "|" + name + "|" + messageQueueId + "|"
+                                 + p.getUniqueId().toString() + "|health");
+            }
+            else {
+                formattedMessage = formattedMessage.replace("%health%", "[§8||||||||||§r]");
+                doSendMessage(player, formattedMessage);
+            }
+        }
+        else {
+            doSendMessage(player, formattedMessage);
+        }
+    }
+
+    protected void processIpcQuery(String message) {
+        StringTokenizer tk = new StringTokenizer(message, "|");
+        if(tk.countTokens() != 4) return;
+        tk.nextToken();
+        Integer mId = Integer.valueOf(tk.nextToken());
+        if(!messageQueue.containsKey(mId)) return;
+        String playerId = tk.nextToken();
+        String values = tk.nextToken();
+        if(!values.startsWith("health=")) return;
+        Double healthd = Double.valueOf(values.substring(values.indexOf("=") + 1)) / 2.0;
+        int health = healthd.intValue();
+        if(health < 0) health = 0;
+        if(health > 10) health = 10;
+        String healthBar = health <= 3 ? "§4" : (health <= 8 ? "§e" : "§2");
+        healthBar += repeatString("|", health) + "§8" + repeatString("|", 10 - health);
+        String chatMessage = messageQueue.get(mId);
+        if(!chatMessage.startsWith(playerId + "|")) return;
+        chatMessage = chatMessage.substring(chatMessage.indexOf("|") + 1);
+        chatMessage = chatMessage.replace("%health%", healthBar);
+        CommandSender sender = ProxyServer.getInstance().getPlayer(UUID.fromString(playerId));
+        doSendMessage(sender, chatMessage);
+    }
+
+    private String repeatString(String s, int count) {
+        String ret = "";
+        for(int i = 0; i < count; i++) ret += s;
+        return ret;
+    }
+    
+    protected void doSendMessage(CommandSender sender, String formattedMessage) {
+        Collection<ProxiedPlayer> recipientList = getRecipientList(sender);
         if(recipientList == null) {
-            sendFailureMessage(player);
+            sendFailureMessage(sender);
             return;
         }
         for(ProxiedPlayer p: recipientList) {
@@ -120,7 +180,7 @@ public class Channel
             }
         }
     }
-
+    
     protected Collection<ProxiedPlayer> getRecipientList(CommandSender player) {
         return ProxyServer.getInstance().getPlayers();
     }

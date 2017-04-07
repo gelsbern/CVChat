@@ -12,24 +12,33 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.config.Configuration;
 
+import org.cubeville.cvipc.CVIPC;
+import org.cubeville.cvipc.IPCInterface;
+
 import org.cubeville.cvchat.CVChat;
 import org.cubeville.cvchat.Util;
 
-public class ChannelManager
+public class ChannelManager implements IPCInterface
 {
     private Map<String, Channel> channels;
     private File statusFolder;
 
-    Channel localChannel; // TODO: no no no no
+    private Map<Integer, String> messageQueue;
+    private Integer messageQueueId;
+
+    private CVIPC ipc;
 
     private static ChannelManager instance;
     public static ChannelManager getInstance() {
         return instance;
     }
-    
-    public ChannelManager(Configuration config, File statusFolder) {
+
+    public ChannelManager(Configuration config, File statusFolder, CVIPC ipc) {
         instance = this;
-        
+
+        this.ipc = ipc;
+        ipc.registerInterface("chatquery", this);
+            
         this.statusFolder = statusFolder;
 
         channels = new HashMap<>();
@@ -51,12 +60,28 @@ public class ChannelManager
                                           channelConfig.getBoolean("filtered"),
                                           (List<String>) channelConfig.getList("commands"));
             channels.put(channelName, channel);
-            if(type.equals("local")) localChannel = channel;
         }
         
         
     }
 
+    public void sendQuery(String channel, Integer id, ProxiedPlayer player, String parameter) {
+        ipc.sendMessage(player.getServer().getInfo().getName(), "chatquery|" + channel + "|" + id + "|" + player + "|" + parameter);
+    }
+
+    public CVIPC getIPC() {
+        return ipc;
+    }
+    
+    public void process(String serverName, String channel, String message) {
+        int idx = message.indexOf("|");
+        if(idx == -1) return;
+        String channelName = message.substring(0, idx);
+        if(channels.containsKey(channelName)) {
+            channels.get(channelName).processIpcQuery(message);
+        }
+    }
+    
     public void saveStatus(ProxiedPlayer player) {
         List<String> list = new ArrayList<>();
         for(Channel channel: channels.values()) {
@@ -105,16 +130,18 @@ public class ChannelManager
         return null;
     }
 
-    public Channel getLocalChannel() {
-        return localChannel;
+    public LocalChannel getLocalChannel() {
+        for(String channel: channels.keySet()) {
+            if(channels.get(channel) instanceof LocalChannel) {
+                return (LocalChannel) channels.get(channel);
+            }
+        }
+        return null;        
     }
-    //public LocalChannel getLocalChannel() {
-        // TODO
-        //for(String channel: channels.keySet()) {
-        //if(channels.get(channel) instanceof LocalChannel) return channels.get(localChannel);
-        //}
-        //return null;
-    //}
+
+    public Channel getChannel(String name) {
+        return channels.get(name);
+    }
     
     public Collection<Channel> getChannels() {
         return channels.values();

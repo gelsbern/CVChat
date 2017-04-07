@@ -46,11 +46,12 @@ public class MsgCommand extends CommandBase
     protected static void sendMessage(ProxiedPlayer sender, ProxiedPlayer recipient, String[] args, int argsOffset) {
         String message = Util.removeSectionSigns(Util.joinStrings(args, argsOffset));
 
-        sender.sendMessage("§7(To " + recipient.getDisplayName() + "§7): §r" + message);
-        recipient.sendMessage("§7(From " + sender.getDisplayName() + "§7): §r" + message);
+        sender.sendMessage("§3(To " + recipient.getDisplayName() + "§3): §r" + message);
+        recipient.sendMessage("§3(From " + sender.getDisplayName() + "§3): §r" + message);
 
         lastMessageReceived.put(recipient.getUniqueId(), sender.getUniqueId());
         lastMessageSent.put(sender.getUniqueId(), recipient.getUniqueId());
+        lastMessageReceived.put(sender.getUniqueId(), recipient.getUniqueId());
     }
 
     protected static UUID getLastMessageReceived(UUID player) {

@@ -28,7 +28,7 @@ public class MuteCommand extends CommandBase
         if(!verify(sender, !player.getUniqueId().equals(sender.getUniqueId()), "§cYou can't mute yourself, silly!")) return;
         
         if(!verifyOutranks(sender, player)) {
-            player.sendMessage(player.getDisplayName() + "§c tried to mute you. Should we instaban that person, your majesty?");
+            player.sendMessage(sender.getDisplayName() + "§c tried to mute you. Should we instaban that person, your majesty?");
             return;
         }
 

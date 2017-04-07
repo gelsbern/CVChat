@@ -18,6 +18,19 @@ public class ChannelFactory
                                     filtered,
                                     commands);
         }
+        else if(type != null && type.equals("local")) {
+            return new LocalChannel(name,
+                                    viewPermission,
+                                    sendPermission,
+                                    colorPermission,
+                                    leavePermission,
+                                    format,
+                                    isDefault,
+                                    autojoin,
+                                    listable,
+                                    filtered,
+                                    commands);
+        }
         else {
             return new Channel(name,
                                viewPermission,

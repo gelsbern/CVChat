@@ -98,6 +98,14 @@ public class Util
         return ret;
     }
 
+    public static String removeColorCodes(String text) {
+        String ret = text;
+        for(int i = 0; i < colorCodes.length; i++) {
+            ret = ret.replace("§" + colorCodes[i], "");
+        }
+        return ret;
+    }
+    
     public static boolean playerIsHidden(ProxiedPlayer player) {
         return (BungeeTabListPlus.isHidden(BungeeTabListPlus.getInstance().getConnectedPlayerManager().getPlayer(player)));
     }

@@ -12,6 +12,8 @@ import net.md_5.bungee.api.plugin.Command;
 
 import org.cubeville.cvchat.ranks.RankManager;
 
+import org.cubeville.cvchat.playerdata.PlayerDataManager;
+
 public abstract class CommandBase extends Command
 {
     String usage;
@@ -28,19 +30,29 @@ public abstract class CommandBase extends Command
         this.usage = usage;
     }
     
-    public abstract void execute(CommandSender commandSender, String[] args);
+    public abstract void execute(CommandSender sender, String[] args);
 
-    public boolean outranks(ProxiedPlayer player, ProxiedPlayer compareTo) {
-        RankManager rm = RankManager.getInstance();
-        return rm.getPriority(player) > rm.getPriority(compareTo);
-    }
-
-    public boolean verifyOutranks(ProxiedPlayer sender, ProxiedPlayer player) {
-        if(!outranks(sender, player)) {
+    
+    public boolean verifyPermission(CommandSender sender, String permission) {
+        if(!sender.hasPermission(permission)) {
             sender.sendMessage("§cNo permission.");
             return false;
         }
         return true;
+    }
+    
+    public boolean verifyOutranks(CommandSender commandSender, UUID player) {
+        if(!(commandSender instanceof ProxiedPlayer)) return false;
+        ProxiedPlayer sender = (ProxiedPlayer) commandSender;
+        if(!getPDM().outranks(sender.getUniqueId(), player)) {
+            sender.sendMessage("§cNo permission.");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean verifyOutranks(CommandSender sender, ProxiedPlayer player) {
+        return verifyOutranks(sender, player.getUniqueId());
     }
     
     public boolean verifyOnline(ProxiedPlayer sender, String playerName) {
@@ -55,7 +67,7 @@ public abstract class CommandBase extends Command
         return ProxyServer.getInstance().getPlayer(playerName);
     }
 
-    public boolean verifyNotLessArguments(ProxiedPlayer sender, String[] args, int min) {
+    public boolean verifyNotLessArguments(CommandSender sender, String[] args, int min) {
         if(args.length < min) {
             sender.sendMessage("§cToo few arguments.");
             if(usage != null) sender.sendMessage(usage);
@@ -64,7 +76,7 @@ public abstract class CommandBase extends Command
         return true;
     }
 
-    public boolean verifyNotMoreArguments(ProxiedPlayer sender, String[] args, int max) {
+    public boolean verifyNotMoreArguments(CommandSender sender, String[] args, int max) {
         if(args.length > max) {
             sender.sendMessage("§cToo many arguments.");
             if(usage != null) sender.sendMessage(usage);
@@ -118,4 +130,18 @@ public abstract class CommandBase extends Command
             return UUID.fromString("00000000-0000-0000-0000-000000000000");
         }
     }
+
+    public String joinStrings(String[] args, int offset) {
+        String ret = "";
+        for(int i = offset; i < args.length; i++) {
+            if(ret.length() > 0) ret += " ";
+            ret += args[i];
+        }
+        return ret;
+    }
+
+    public PlayerDataManager getPDM() {
+        return PlayerDataManager.getInstance();
+    }
+    
 }

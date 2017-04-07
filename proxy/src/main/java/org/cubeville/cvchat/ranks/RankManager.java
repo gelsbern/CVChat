@@ -14,8 +14,8 @@ import net.md_5.bungee.config.Configuration;
 public class RankManager
 {
     private List<Rank> ranks;
-    private Map<UUID, String> playerPostfix;
-    private Map<UUID, Integer> playerPriority;
+    //private Map<UUID, String> playerPostfix; // TODO Postfix cache disabled for now, needs to be cleared once in a while
+    //private Map<UUID, Integer> playerPriority;
     
     private static RankManager instance;
     public static RankManager getInstance() {
@@ -26,8 +26,8 @@ public class RankManager
         instance = this;
         
         ranks = new ArrayList<>();
-        playerPostfix = new HashMap<>();
-        playerPriority = new HashMap<>();
+        //playerPostfix = new HashMap<>();
+        //playerPriority = new HashMap<>();
         
         Collection<String> rankNames = config.getKeys();
         for(String rankName: rankNames) {
@@ -42,8 +42,8 @@ public class RankManager
     public String getPostfix(CommandSender sender) {
         if(!(sender instanceof ProxiedPlayer)) return "CO";
         ProxiedPlayer player = (ProxiedPlayer) sender;
-        String postfix = playerPostfix.get(player.getUniqueId());
-        if(postfix != null) return postfix;
+        //String postfix = playerPostfix.get(player.getUniqueId());
+        //if(postfix != null) return postfix;
 
         int prio = -1;
         String ret = "";
@@ -53,13 +53,13 @@ public class RankManager
                 prio = p.getPriority();
             }
         }
-        playerPostfix.put(player.getUniqueId(), ret);
+        //playerPostfix.put(player.getUniqueId(), ret);
         return ret;
     }
 
     public int getPriority(ProxiedPlayer player) {
-        Integer priority = playerPriority.get(player.getUniqueId());
-        if(priority != null) return priority;
+        //Integer priority = playerPriority.get(player.getUniqueId());
+        //if(priority != null) return priority;
 
         int prio = 0;
         for(Rank rank: ranks) {
@@ -67,7 +67,7 @@ public class RankManager
                 prio = rank.getPriority();
             }
         }
-        playerPriority.put(player.getUniqueId(), prio);
+        //playerPriority.put(player.getUniqueId(), prio);
         return prio;
     }
 }

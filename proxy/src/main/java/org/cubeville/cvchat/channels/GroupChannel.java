@@ -74,7 +74,6 @@ public class GroupChannel extends Channel
             return true;
         }
         else {
-            System.out.println(groupPlayer.getDisplayName() + " already has a group, joining");
             groupMembers.get(group).add(newMember.getUniqueId());
             groupMembership.put(newMember.getUniqueId(), group);
             return false;

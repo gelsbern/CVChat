@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import org.cubeville.cvchat.playerdata.PlayerDataManager;
 
 public class SanctionManager
 {
@@ -41,6 +44,26 @@ public class SanctionManager
         }
     }
 
-    
+    public void banPlayer(CommandSender sender, UUID bannedPlayerId, String banReason, long duration, boolean silent) {
+        UUID senderId = null;
+        if(sender instanceof ProxiedPlayer) senderId = ((ProxiedPlayer) sender).getUniqueId();
+        PlayerDataManager pdm = PlayerDataManager.getInstance();
+        pdm.banPlayer(bannedPlayerId, senderId, banReason, duration * 1000);
+        {
+            ProxiedPlayer player = ProxyServer.getInstance().getPlayer(bannedPlayerId);
+            if(player != null) {
+                String kname = "Console";
+                if(sender instanceof ProxiedPlayer) kname = ((ProxiedPlayer) sender).getDisplayName();
+                player.disconnect("§6You have been " + (duration != 0 ? "temporarily " : "") + "banned by §e" + kname + "§6.\nReason: §e" + banReason);
+            }
+        }
+    }
 
+    public String unbanPlayer(CommandSender sender, String bannedPlayerName, boolean silent) {
+        PlayerDataManager pdm = PlayerDataManager.getInstance();
+        UUID bannedPlayerId = pdm.getPlayerId(bannedPlayerName);
+        if(bannedPlayerId == null) return null;
+        pdm.unbanPlayer(bannedPlayerId);
+        return pdm.getPlayerName(bannedPlayerId);
+    }
 }

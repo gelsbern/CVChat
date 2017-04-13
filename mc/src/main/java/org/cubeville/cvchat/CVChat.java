@@ -1,13 +1,16 @@
 package org.cubeville.cvchat;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,15 +18,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.cubeville.cvipc.CVIPC;
 import org.cubeville.cvipc.IPCInterface;
 
 public class CVChat extends JavaPlugin implements Listener, IPCInterface
 {
-    CVIPC ipc;
+	Set<String> ranks;
+	CVIPC ipc;
     
     public void onEnable() {
+    	ranks = getConfig().getConfigurationSection("ranks").getKeys(false);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(this, this);
 
@@ -40,6 +46,20 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
+        
+        String highestRank = "default";
+        Player player = event.getPlayer();
+        int prio = 0;
+        for (String rank : ranks) {
+            ConfigurationSection rankData = getConfig().getConfigurationSection("ranks").getConfigurationSection(rank);
+            if (player.hasPermission(rankData.getString("permission")) && rankData.getInt("priority") > prio) {
+                prio = rankData.getInt("priority");
+                highestRank = rank;
+            }
+        }
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard mainBoard = manager.getMainScoreboard();
+        mainBoard.getTeam(highestRank).addEntry(player.getName().toString());
     }
 
     @EventHandler

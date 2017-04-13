@@ -1,0 +1,42 @@
+ranks:
+  citizen:
+    postfix: "(§dC§f)"
+    priority: 10
+    permission: default
+    color: "f"
+
+  rm:
+    postfix: "(§dRM§f)"
+    priority: 20
+    permission: cvchat.rank.rm
+    color: "7"
+
+  ra:
+    postfix: "(§dRA§f)"
+    priority: 30
+    permission: cvchat.rank.ra
+    color: "7"
+
+  mod:
+    postfix: "(§dM§f)"
+    priority: 40
+    permission: cvchat.rank.mod
+    color: "a"
+
+  smod:
+    postfix: "(§dS§f)"
+    priority: 50
+    permission: cvchat.rank.smod
+    color: "d"
+
+  admin:
+    postfix: "(§dA§f)"
+    priority: 60
+    permission: cvchat.rank.admin
+    color: "b"
+
+  sadmin:
+    postfix: "(§dSA§f)"
+    priority: 70
+    permission: cvchat.rank.sadmin
+    color: "4"

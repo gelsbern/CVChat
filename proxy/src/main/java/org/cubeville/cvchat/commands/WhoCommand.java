@@ -11,6 +11,7 @@ import net.md_5.bungee.api.plugin.Command;
 
 import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
+import org.cubeville.cvchat.ranks.RankManager;
 
 public class WhoCommand extends Command
 {
@@ -36,6 +37,7 @@ public class WhoCommand extends Command
                 boolean hvis = (player.getUniqueId().equals(sender.getUniqueId())) || (sender.hasPermission("cvchat.showvanished"));
                 if(vis || hvis) {
                     if(list.length() > 0) list += "§r, ";
+                    list += "§" + RankManager.getInstance().getColor(player);
                     if(!vis && hvis) list += "§o";
                     list += player.getDisplayName();
                     cnt++;

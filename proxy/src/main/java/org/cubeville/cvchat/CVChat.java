@@ -25,12 +25,16 @@ import org.cubeville.cvchat.commands.ChannelCommand;
 import org.cubeville.cvchat.commands.ChatCommand;
 import org.cubeville.cvchat.commands.CheckbanCommand;
 import org.cubeville.cvchat.commands.CheckCommand;
-import org.cubeville.cvchat.commands.ClaimCommand;
+import org.cubeville.cvchat.commands.DibsCommand;
 import org.cubeville.cvchat.commands.DoneCommand;
+import org.cubeville.cvchat.commands.FinishCommand;
+import org.cubeville.cvchat.commands.FjCommand;
 import org.cubeville.cvchat.commands.ForwardCommand;
+import org.cubeville.cvchat.commands.FqCommand;
 import org.cubeville.cvchat.commands.GroupCommand;
 import org.cubeville.cvchat.commands.HoldCommand;
 import org.cubeville.cvchat.commands.KickCommand;
+import org.cubeville.cvchat.commands.ModlistCommand;
 import org.cubeville.cvchat.commands.MsgCommand;
 import org.cubeville.cvchat.commands.MuteCommand;
 import org.cubeville.cvchat.commands.NoteCommand;
@@ -97,6 +101,26 @@ public class CVChat extends Plugin {
 
             // Start auto messager
             AutoMessager messager = new AutoMessager(120, config.getStringList("automessager"), this);
+
+            { // Install ticket system
+                Configuration ticketDaoConfig = (Configuration) config.get("tickets");
+                if(ticketDaoConfig != null) {
+                    TicketDao ticketDao = new TicketDao(ticketDaoConfig.getString("db_user"),
+                                                        ticketDaoConfig.getString("db_password"),
+                                                        ticketDaoConfig.getString("db_database"));
+                    ticketManager = new TicketManager(this, ipc, ticketDao);
+                    pm.registerCommand(this, new CheckCommand(ticketManager));
+                    pm.registerCommand(this, new DibsCommand(ticketManager));
+                    pm.registerCommand(this, new DoneCommand(ticketManager));
+                    pm.registerCommand(this, new HoldCommand(ticketManager));
+                    pm.registerCommand(this, new ReopenCommand(ticketManager));
+                    pm.registerCommand(this, new TpidCommand(ticketManager));
+                    pm.registerCommand(this, new UnclaimCommand(ticketManager));
+                }
+                else {
+                    System.out.println("No ticket dao configuration found. Ticket system not available.");
+                }
+            }
             
             // Initialize channel manager from configuration
             Configuration channelList = (Configuration) config.get("channels");
@@ -119,11 +143,14 @@ public class CVChat extends Plugin {
             Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
             Configuration textCommandConfig = (Configuration)config.get("textcommands");
             TextCommandManager textCommandManager = new TextCommandManager(textCommandConfig);
-            pm.registerListener(this, new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager));
-
-            pm.registerListener(this, new LoginListener(channelManager));
+            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ipc);
+            pm.registerListener(this, chatListener);
+            
+            pm.registerListener(this, new LoginListener(channelManager, ticketManager));
             pm.registerCommand(this, new ChannelCommand(channelManager));
 
+            pm.registerCommand(this, new FinishCommand(ipc, textCommandManager));
+            
             // Load ranks configuration
             Configuration ranksList = (Configuration) config.get("ranks");
             RankManager rankManager = new RankManager(ranksList);
@@ -146,31 +173,12 @@ public class CVChat extends Plugin {
                 pm.registerCommand(this, new UnbanCommand());
                 pm.registerCommand(this, new CheckbanCommand());
                 
-                // Player list command
+                // Player list commands
                 pm.registerCommand(this, new WhoCommand());
+                pm.registerCommand(this, new ModlistCommand());
                 
                 // Little helper command, remove when done! TODO
                 pm.registerCommand(this, new TestCommand());
-            }
-
-            { // Install ticket system
-                Configuration ticketDaoConfig = (Configuration) config.get("tickets");
-                if(ticketDaoConfig != null) {
-                    TicketDao ticketDao = new TicketDao(ticketDaoConfig.getString("db_user"),
-                                                        ticketDaoConfig.getString("db_password"),
-                                                        ticketDaoConfig.getString("db_database"));
-                    ticketManager = new TicketManager(this, ipc, ticketDao);
-                    pm.registerCommand(this, new CheckCommand(ticketManager));
-                    pm.registerCommand(this, new ClaimCommand(ticketManager));
-                    pm.registerCommand(this, new DoneCommand(ticketManager));
-                    pm.registerCommand(this, new HoldCommand(ticketManager));
-                    pm.registerCommand(this, new ReopenCommand(ticketManager));
-                    pm.registerCommand(this, new TpidCommand(ticketManager));
-                    pm.registerCommand(this, new UnclaimCommand(ticketManager));
-                }
-                else {
-                    System.out.println("No ticket dao configuration found. Ticket system not available.");
-                }
             }
 
             { // Install playerdata system
@@ -193,6 +201,11 @@ public class CVChat extends Plugin {
                 }
             }
 
+            { // Other commands
+                pm.registerCommand(this, new FjCommand());
+                pm.registerCommand(this, new FqCommand());
+            }
+            
             { // Chat forward commands for quest
                 for(int i = 0; i < 10; i++) {
                     pm.registerCommand(this, new ForwardCommand(String.valueOf(i), String.valueOf(i)));

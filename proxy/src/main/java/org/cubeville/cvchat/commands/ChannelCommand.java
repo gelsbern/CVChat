@@ -29,16 +29,18 @@ public class ChannelCommand extends Command
                 player.sendMessage("§c/channel " + args[0] + " <name>");
                 return;
             }
-            if(!channelManager.getChannelMap().containsKey(args[1])) {
+
+            String channelName = args[1].toLowerCase();
+            if(!channelManager.getChannelMap().containsKey(channelName)) {
                 player.sendMessage("§cThat channel doesn't exist.");
                 return;
             }
             boolean changed = false;
             if (args[0].charAt(0) == 'l') {
-                changed = channelManager.getChannelMap().get(args[1]).leave(player);
+                changed = channelManager.getChannelMap().get(channelName).leave(player);
             }
             else {
-                changed = channelManager.getChannelMap().get(args[1]).join(player);
+                changed = channelManager.getChannelMap().get(channelName).join(player);
             }
             if (changed) channelManager.saveStatus(player);
         }

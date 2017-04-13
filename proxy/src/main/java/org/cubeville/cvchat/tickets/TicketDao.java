@@ -85,7 +85,8 @@ public class TicketDao extends DaoBase
     protected synchronized void updateTicket(Ticket ticket) {
         Connection connection = getConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE tickets SET is_closed = ?, is_held = ?, is_claimed = ?, player_notified = ?, moderator = ?, moderator_name = ?, moderator_text = ?, moderator_timestamp = FROM_UNIXTIME(?)");
+            PreparedStatement statement = connection.prepareStatement("UPDATE tickets SET is_closed = ?, is_held = ?, is_claimed = ?, player_notified = ?, moderator = ?, moderator_name = ?, moderator_text = ?, moderator_timestamp = FROM_UNIXTIME(?) WHERE id = ?");
+            statement.setInt(9, ticket.getId());
             statement.setBoolean(1, ticket.isClosed());
             statement.setBoolean(2, ticket.isHeld());
             statement.setBoolean(3, ticket.isClaimed());

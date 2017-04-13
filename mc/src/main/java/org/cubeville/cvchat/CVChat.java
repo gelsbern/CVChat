@@ -66,6 +66,11 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             Location loc = player.getLocation();
             ipc.sendMessage("modreq", player.getUniqueId() + "|" + loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "|" + text);
         }
+        else if(command.getName().equals("unlocktutorialchat")) {
+            if(!(sender instanceof Player)) return false;
+            Player player = (Player) sender;
+            ipc.sendMessage("unlocktutorialchat", player.getUniqueId().toString());
+        }
         return false;
     }
 

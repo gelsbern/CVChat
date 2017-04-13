@@ -14,8 +14,7 @@ import net.md_5.bungee.config.Configuration;
 public class RankManager
 {
     private List<Rank> ranks;
-    //private Map<UUID, String> playerPostfix; // TODO Postfix cache disabled for now, needs to be cleared once in a while
-    //private Map<UUID, Integer> playerPriority;
+    // TODO: Optionally add cache
     
     private static RankManager instance;
     public static RankManager getInstance() {
@@ -34,40 +33,35 @@ public class RankManager
             Configuration rankConfig = (Configuration) config.get(rankName);
             Rank rank = new Rank(rankConfig.getString("postfix"),
                                  rankConfig.getString("permission"),
-                                 rankConfig.getInt("priority"));
+                                 rankConfig.getInt("priority"),
+                                 rankConfig.getString("color"));
             ranks.add(rank);
         }
     }
 
-    public String getPostfix(CommandSender sender) {
-        if(!(sender instanceof ProxiedPlayer)) return "CO";
-        ProxiedPlayer player = (ProxiedPlayer) sender;
-        //String postfix = playerPostfix.get(player.getUniqueId());
-        //if(postfix != null) return postfix;
-
-        int prio = -1;
-        String ret = "";
-        for(Rank p: ranks) {
-            if((p.getPermission().equals("default") || player.hasPermission(p.getPermission())) && p.getPriority() > prio) {
-                ret = p.getPostfix();
-                prio = p.getPriority();
-            }
-        }
-        //playerPostfix.put(player.getUniqueId(), ret);
-        return ret;
-    }
-
-    public int getPriority(ProxiedPlayer player) {
-        //Integer priority = playerPriority.get(player.getUniqueId());
-        //if(priority != null) return priority;
-
+    private Rank getRank(ProxiedPlayer player) {
         int prio = 0;
+        Rank ret = null;
         for(Rank rank: ranks) {
             if((rank.getPermission().equals("default") || player.hasPermission(rank.getPermission())) && rank.getPriority() > prio) {
                 prio = rank.getPriority();
+                ret = rank;
             }
         }
-        //playerPriority.put(player.getUniqueId(), prio);
-        return prio;
+        return ret;
+    }
+    
+    public String getPostfix(CommandSender sender) {
+        if(!(sender instanceof ProxiedPlayer)) return "CO";
+        ProxiedPlayer player = (ProxiedPlayer) sender;
+        return getRank(player).getPostfix();
+    }
+
+    public int getPriority(ProxiedPlayer player) {
+        return getRank(player).getPriority();
+    }
+
+    public String getColor(ProxiedPlayer player) {
+        return getRank(player).getColor();
     }
 }

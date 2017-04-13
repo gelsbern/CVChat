@@ -175,4 +175,11 @@ public class PlayerDataManager
         if(pd == null) return false;
         return pd.getTutorialFinished();
     }
+
+    public void setFinishedTutorial(UUID player) {
+        PlayerData pd = playerData.get(player);
+        if(pd == null) return;
+        pd.setTutorialFinished(true);
+        dao.updatePlayerData(pd);
+    }
 }

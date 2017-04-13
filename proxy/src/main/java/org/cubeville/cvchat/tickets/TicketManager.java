@@ -62,9 +62,24 @@ public class TicketManager implements IPCInterface
         }
     }
 
+    public void playerLogin(ProxiedPlayer player) {
+        UUID playerId = player.getUniqueId();
+        for(Ticket ticket: tickets) {
+            if(ticket.isClosed() == true && ticket.playerNotified() == false && ticket.getPlayer().equals(playerId)) {
+                sendPlayerNotification(playerId, "§6" + ticket.getModeratorName() + "§6 has completed your request:");
+                sendPlayerNotification(playerId, "§6Request - §7" + ticket.getText());
+                sendPlayerNotification(playerId, "§6Mod comment - §7" + ticket.getModeratorText());
+                ticket.setPlayerNotified(true);
+                updateTicketAsync(ticket);
+            }
+        }
+    }
+
     private boolean playerHasTicket(UUID playerId) {
         for(Ticket ticket: tickets) {
-            if(ticket.getPlayer().equals(playerId)) return true;
+            if(ticket.isClosed() == false && ticket.isHeld() == false && ticket.getPlayer().equals(playerId)) {
+                return true;
+            }
         }
         return false;
         
@@ -184,7 +199,7 @@ public class TicketManager implements IPCInterface
         ticket.setModeratorTimestamp(System.currentTimeMillis());
         updateTicketAsync(ticket);
 
-        sendNotification("§6" + player.getName() + "§6 is now handling request #" + ticket.getId() + ".");
+        sendNotification("§6" + player.getName() + "§6 calls dibs on request #" + ticket.getId() + ".");
         sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 is now handling your request.");
     }
 
@@ -206,7 +221,7 @@ public class TicketManager implements IPCInterface
         ticket.setClosed(true);
         ticket.setModeratorText(text);
         ticket.setModerator(player.getUniqueId());
-        ticket.setModeratorName(player.getName());
+        ticket.setModeratorName(player.getName()); // TODO: Get current name from playerdata module (not just here, everywhere)
         ticket.setModeratorTimestamp(System.currentTimeMillis());
 
         sendNotification("§6Request #" + ticket.getId() + " has been completed.");
@@ -238,6 +253,7 @@ public class TicketManager implements IPCInterface
         ticket.setModerator(player.getUniqueId());
         ticket.setModeratorName(player.getName());
         ticket.setModeratorTimestamp(System.currentTimeMillis());
+        ticket.setPlayerNotified(false);
         updateTicketAsync(ticket);
 
         sendNotification("§6Request #" + ticket.getId() + " has been reopened.");

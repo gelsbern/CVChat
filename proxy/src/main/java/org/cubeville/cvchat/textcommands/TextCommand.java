@@ -5,13 +5,16 @@ import java.util.List;
 
 public class TextCommand
 {
+    int id;
     Set<String> aliases;
     List<String> text;
     boolean mandatory;
     
-    public TextCommand(Set<String> aliases, List<String> text, boolean mandatory) {
+    public TextCommand(int id, Set<String> aliases, List<String> text, boolean mandatory) {
+        this.id = id;
         this.aliases = aliases;
         this.text = text;
+        this.mandatory = mandatory;
     }
 
     public boolean matches(String command) {
@@ -24,6 +27,14 @@ public class TextCommand
 
     public List<String> getText() {
         return text;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public boolean isMandatory() {
+        return mandatory;
     }
 }
         

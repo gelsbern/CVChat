@@ -66,4 +66,22 @@ public class SanctionManager
         pdm.unbanPlayer(bannedPlayerId);
         return pdm.getPlayerName(bannedPlayerId);
     }
+
+    public boolean checkFilter(String message) {
+        for(String term: filterTerms) {
+            if(message.toLowerCase().indexOf(term) != -1) return true;
+        }
+        return false;
+    }
+
+    public boolean checkCaps(String message) {
+        if(message.length() < 10) return false;
+        int cnt = 0;
+        int maxcnt = message.length() / 3;
+        for(int i = 0; i < message.length(); i++) {
+            if(message.charAt(i) >= 'A' && message.charAt(i) <= 'Z') cnt++;
+            if(cnt > maxcnt) return true;
+        }
+        return false;
+    }
 }

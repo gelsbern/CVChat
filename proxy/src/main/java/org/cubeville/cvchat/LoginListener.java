@@ -17,13 +17,16 @@ import net.md_5.bungee.event.EventPriority;
 import org.cubeville.cvchat.channels.ChannelManager;
 import org.cubeville.cvchat.playerdata.PlayerDataManager;
 import org.cubeville.cvchat.ranks.RankManager;
+import org.cubeville.cvchat.tickets.TicketManager;
 
 public class LoginListener implements Listener
 {
     ChannelManager channelManager;
+    TicketManager ticketManager;
     
-    public LoginListener(ChannelManager channelManager) {
+    public LoginListener(ChannelManager channelManager, TicketManager ticketManager) {
         this.channelManager = channelManager;
+        this.ticketManager = ticketManager;
     }
 
     @EventHandler
@@ -48,7 +51,7 @@ public class LoginListener implements Listener
             String type = pdm.isPermanentlyBanned(connection.getUniqueId()) ? "permanently" : "temporarily";
             event.setCancelReason("§cYou're " + type + " banned from this server.\n§eReason: §c" + pdm.getBanReason(connection.getUniqueId()));
         }
-        String[] whitelist = {"DoubleSammich", "Firesnuke", "LissaLaine", "_Tiffy_", "Raytheonx", "inutterable", "unixadmin", "pikeman327", "Nafartiti", "stldenise", "Herzz", "deanwin", "saemai", "A_cloud_ora", "Monoshish", "Monikorpse", "Clicki", "WallyDonkey", "BlueFirebolt", "Hjortshoej_", "Clicker27", "KitKathy", "Ptown16", "SeaGuy", "FrediW", "VicTheDonut", "Cade1390", "JimS996", "RandomRob13", "vic_torus", "Daugeas", "Sequoia", "SauceyTim", "CaveHuntress", "CreepingDespair", "_HunniB_", "TemperanceL", "Twilighta"};
+        String[] whitelist = {"DoubleSammich", "Firesnuke", "LissaLaine", "_Tiffy_", "Raytheonx", "inutterable", "unixadmin", "pikeman327", "Nafartiti", "stldenise", "Herzz", "deanwin", "saemai", "A_cloud_ora", "Monoshish", "Monikorpse", "Clicki", "WallyDonkey", "BlueFirebolt", "Hjortshoej_", "Clicker27", "KitKathy", "Ptown16", "SeaGuy", "FrediW", "VicTheDonut", "Cade1390", "JimS996", "RandomRob13", "vic_torus", "Daugeas", "Sequoia", "SauceyTim", "CaveHuntress", "CreepingDespair", "_HunniB_", "TemperanceL", "Twilighta", "ACreepMaster"};
         boolean whitelisted = false;
         for(int i = 0; i < whitelist.length; i++) {
             if(event.getConnection().getName().equals(whitelist[i])) {
@@ -98,6 +101,8 @@ public class LoginListener implements Listener
         }
         pdm.playerLogin(playerId, getStrippedIpAddress(player), RankManager.getInstance().getPriority(player));
 
+        ticketManager.playerLogin(player);
+        
         System.out.println("Check if player logging in has finished the tutorial.");
         if(!pdm.finishedTutorial(playerId)) {
             System.out.println("Setting login location to tutorial for player " + player.getDisplayName());

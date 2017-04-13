@@ -34,7 +34,7 @@ public class Channel
 
     private Map<Integer, String> messageQueue;
     private Integer messageQueueId;
-        
+
     public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
         this.name = name;
         this.viewPermission = viewPermission;
@@ -47,11 +47,12 @@ public class Channel
         this.listable = listable;
         this.filtered = filtered;
         this.commands = commands;
-        
+
         members = new HashSet<>();
 
         messageQueue = new HashMap<>();
         messageQueueId = 0;
+
     }
 
     public void playerLogin(ProxiedPlayer player, String configuration) {
@@ -94,6 +95,30 @@ public class Channel
             }
         }
 
+        if(filtered && (player instanceof ProxiedPlayer)) {
+            ProxiedPlayer pp = (ProxiedPlayer) player;
+            if(SanctionManager.getInstance().checkFilter(message)) {
+                String fm = message; //SanctionManager.getInstance().getFilterHighlight();
+                if(player.hasPermission("cvchat.nofilterkick")) {
+                    player.sendMessage("§cMessage filtered for swearing!");
+                }
+                else {
+                    pp.disconnect("§cKicked for swearing:\n" + fm);
+                    for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
+                        p.sendMessage("§e" + pp.getDisplayName() + "§c got kicked for swearing.");
+                        if(p.hasPermission("cvchat.showfiltercause")) p.sendMessage("§cMessage: §r" + fm);
+                    }
+                }
+                return;
+            }
+            if(SanctionManager.getInstance().checkCaps(message)) {
+                if(!player.hasPermission("cvchat.bypasscapsfilter")) {
+                    player.sendMessage("§cPlease turn off caps lock or use less caps, message filtered.");
+                    return;
+                }
+            }
+        }
+        
         String formattedMessage = format;
 
         message.replace("§", "");

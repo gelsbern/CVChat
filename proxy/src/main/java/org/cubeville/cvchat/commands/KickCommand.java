@@ -8,7 +8,7 @@ import org.cubeville.cvchat.Util;
 public class KickCommand extends CommandBase
 {
     public KickCommand() {
-        super("kick");
+        super("kick", "cvchat.kick");
         setUsage("§c/kick [-s] <player> <reason>");
     }
 

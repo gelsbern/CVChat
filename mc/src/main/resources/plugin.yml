@@ -7,3 +7,5 @@ depend: [CVIPC]
 commands:
   modreq:
     description: Send moderator request
+  unlocktutorialchat:
+    description: Unlocks tutorial chat

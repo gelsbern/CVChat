@@ -45,7 +45,17 @@ public class TempbanCommand extends CommandBase
             amount *= 60;
         }
         else {
-            sender.sendMessage("§cUnit bust be minutes, hours or days.");
+            sender.sendMessage("§cUnit must be minutes, hours or days.");
+            return;
+        }
+
+        if(amount > 3600 && sender.hasPermission("cvchat.tempban.limited") == true) {
+            sender.sendMessage("§cYou can't tempban for more than 1 hour.");
+            return;
+        }
+        
+        if(amount > 604800 && sender.hasPermission("cvchat.tempban.unlimited") == false) {
+            sender.sendMessage("§cYou can't tempban for more than 7 days.");
             return;
         }
 

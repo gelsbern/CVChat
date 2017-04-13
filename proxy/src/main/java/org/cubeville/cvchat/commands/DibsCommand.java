@@ -4,12 +4,12 @@ import net.md_5.bungee.api.CommandSender;
 
 import org.cubeville.cvchat.tickets.TicketManager;
 
-public class ClaimCommand extends CommandBase
+public class DibsCommand extends CommandBase
 {
     TicketManager ticketManager;
     
-    public ClaimCommand(TicketManager ticketManager) {
-        super("claim", "cvchat.ticket");
+    public DibsCommand(TicketManager ticketManager) {
+        super("dibs", "cvchat.ticket");
         this.ticketManager = ticketManager;
     }
 
@@ -25,7 +25,7 @@ public class ClaimCommand extends CommandBase
         }
         else {
             commandSender.sendMessage("§cWrong number of arguments.");
-            commandSender.sendMessage("§c/claim <modreq-id>");
+            commandSender.sendMessage("§c/dibs <modreq-id>");
         }
     }
 }

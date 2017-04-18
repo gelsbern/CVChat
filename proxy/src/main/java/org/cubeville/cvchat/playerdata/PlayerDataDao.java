@@ -27,7 +27,7 @@ public class PlayerDataDao extends DaoBase
         Map<UUID, PlayerData> ret = new ConcurrentHashMap<>();
         try {
             Statement statement = connection.createStatement();
-            statement.execute("SELECT id, uuid, name, tutorial_finished, ban_duration, UNIX_TIMESTAMP(ban_start) AS ban_start, UNIX_TIMESTAMP(ban_issued) AS ban_issued, ban_reason, banned_by, UNIX_TIMESTAMP(first_login) AS first_login, UNIX_TIMESTAMP(last_login) AS last_login, UNIX_TIMESTAMP(last_logout) AS last_logout, ip_address, priority FROM playerdata");
+            statement.execute("SELECT id, uuid, name, tutorial_finished, ban_duration, UNIX_TIMESTAMP(ban_start) AS ban_start, UNIX_TIMESTAMP(ban_issued) AS ban_issued, ban_reason, banned_by, UNIX_TIMESTAMP(first_login) AS first_login, UNIX_TIMESTAMP(last_login) AS last_login, UNIX_TIMESTAMP(last_logout) AS last_logout, ip_address, priority, prefix FROM playerdata");
             ResultSet rs = statement.getResultSet();
             while(rs.next()) {
                 int id = rs.getInt("id");
@@ -49,8 +49,9 @@ public class PlayerDataDao extends DaoBase
                 long lastLogout = rs.getLong("last_logout") * 1000;
                 String ipAddress = rs.getString("ip_address");
                 int priority = rs.getInt("priority");
-
-                PlayerData pd = new PlayerData(id, playerId, playerName, tutorialFinished, banDuration, banStart, banIssued, banReason, bannedBy, firstLogin, lastLogin, lastLogout, ipAddress, priority);
+                String prefix = rs.getString("prefix");
+                
+                PlayerData pd = new PlayerData(id, playerId, playerName, tutorialFinished, banDuration, banStart, banIssued, banReason, bannedBy, firstLogin, lastLogin, lastLogout, ipAddress, priority, prefix);
                 ret.put(playerId, pd);
             }
             valid = true;
@@ -74,12 +75,12 @@ public class PlayerDataDao extends DaoBase
             PreparedStatement statement;
             boolean n = false;
             if(playerData.getId() == null) {
-                statement = connection.prepareStatement("INSERT INTO playerdata (uuid, name, tutorial_finished, ban_duration, ban_start, ban_issued, ban_reason, banned_by, first_login, last_login, last_logout, ip_address, priority) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                statement = connection.prepareStatement("INSERT INTO playerdata (uuid, name, tutorial_finished, ban_duration, ban_start, ban_issued, ban_reason, banned_by, first_login, last_login, last_logout, ip_address, priority, prefix) VALUES(?, ?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 n = true;
             }
             else {
-                statement = connection.prepareStatement("UPDATE playerdata SET uuid = ?, name = ?, tutorial_finished = ?, ban_duration = ?, ban_start = FROM_UNIXTIME(?), ban_issued = FROM_UNIXTIME(?), ban_reason = ?, banned_by = ?, first_login = FROM_UNIXTIME(?), last_login = FROM_UNIXTIME(?), last_logout = FROM_UNIXTIME(?), ip_address = ?, priority = ? WHERE id = ?");
-                statement.setInt(14, playerData.getId());
+                statement = connection.prepareStatement("UPDATE playerdata SET uuid = ?, name = ?, tutorial_finished = ?, ban_duration = ?, ban_start = FROM_UNIXTIME(?), ban_issued = FROM_UNIXTIME(?), ban_reason = ?, banned_by = ?, first_login = FROM_UNIXTIME(?), last_login = FROM_UNIXTIME(?), last_logout = FROM_UNIXTIME(?), ip_address = ?, priority = ?, prefix = ? WHERE id = ?");
+                statement.setInt(15, playerData.getId());
             }
             statement.setString(1, playerData.getPlayerId().toString());
             statement.setString(2, playerData.getName());
@@ -98,6 +99,7 @@ public class PlayerDataDao extends DaoBase
             statement.setLong(11, playerData.getLastLogout() / 1000);
             statement.setString(12, playerData.getIpAddress());
             statement.setInt(13, playerData.getPriority());
+            statement.setString(14, playerData.getPrefix());
             statement.executeUpdate();
 
             if(n) {

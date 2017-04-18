@@ -28,16 +28,36 @@ public class LocalChannel extends Channel
         String serverName = player.getServer().getInfo().getName();
         Collection<ProxiedPlayer> allPlayers = ProxyServer.getInstance().getPlayers();
         String greyMessage = "§7" + Util.removeColorCodes(formattedMessage);
+        String lm = "";
         for(ProxiedPlayer p: allPlayers) {
             if(p.hasPermission("cvchat.monitor.local")) {
                 if(!p.getServer().getInfo().getName().equals(serverName)) {
-                    p.sendMessage(greyMessage);
+                    if(!localMuted.contains(p.getUniqueId())) p.sendMessage(greyMessage);
+                }
+                else {
+                    if(localMuted.contains(p.getUniqueId())) {
+                        if(lm.length() > 0) lm += ",";
+                        lm += p.getUniqueId().toString();
+                    }
                 }
             }
         }
 
+        String idlist = player.getUniqueId().toString();
+        if(lm.length() > 0) {
+            idlist += ";" + lm;
+        }
         // 2) Send message to player's server for further handling
-        String msg = "locchat|" + player.getUniqueId() + "|" + formattedMessage;
+        String msg = "locchat|" + idlist + "|" + formattedMessage;
         ChannelManager.getInstance().getIPC().sendMessage(serverName, msg);
+    }
+
+    public void setLocalMonitorMute(UUID playerId, boolean mute) {
+        if(mute) {
+            localMuted.add(playerId);
+        }
+        else {
+            localMuted.remove(playerId);
+        }
     }
 }

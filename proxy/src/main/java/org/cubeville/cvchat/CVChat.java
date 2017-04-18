@@ -34,10 +34,12 @@ import org.cubeville.cvchat.commands.FqCommand;
 import org.cubeville.cvchat.commands.GroupCommand;
 import org.cubeville.cvchat.commands.HoldCommand;
 import org.cubeville.cvchat.commands.KickCommand;
+import org.cubeville.cvchat.commands.LocalCommand;
 import org.cubeville.cvchat.commands.ModlistCommand;
 import org.cubeville.cvchat.commands.MsgCommand;
 import org.cubeville.cvchat.commands.MuteCommand;
 import org.cubeville.cvchat.commands.NoteCommand;
+import org.cubeville.cvchat.commands.PrefixCommand;
 import org.cubeville.cvchat.commands.ProfileCommand;
 import org.cubeville.cvchat.commands.RCommand;
 import org.cubeville.cvchat.commands.ReopenCommand;
@@ -148,12 +150,13 @@ public class CVChat extends Plugin {
             
             pm.registerListener(this, new LoginListener(channelManager, ticketManager));
             pm.registerCommand(this, new ChannelCommand(channelManager));
-
+            
             pm.registerCommand(this, new FinishCommand(ipc, textCommandManager));
             
             // Load ranks configuration
             Configuration ranksList = (Configuration) config.get("ranks");
-            RankManager rankManager = new RankManager(ranksList);
+            Configuration prefixesList = (Configuration) config.get("prefixes");
+            RankManager rankManager = new RankManager(ranksList, prefixesList);
             
             // Load swear filter words 
             sanctionManager = new SanctionManager(config.getStringList("filter"));
@@ -179,6 +182,10 @@ public class CVChat extends Plugin {
                 
                 // Little helper command, remove when done! TODO
                 pm.registerCommand(this, new TestCommand());
+
+                // other commands
+                pm.registerCommand(this, new PrefixCommand());
+                pm.registerCommand(this, new LocalCommand(local));
             }
 
             { // Install playerdata system

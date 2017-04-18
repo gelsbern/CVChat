@@ -18,6 +18,7 @@ public class PlayerData
     private long lastLogout;
     private String ipAddress;
     private int priority;
+    private String prefix;
     
     public PlayerData(UUID playerId, String name, String ipAddress) {
         id = null;
@@ -34,9 +35,10 @@ public class PlayerData
         lastLogout = lastLogin;
         this.ipAddress = ipAddress;
         priority = 0;
+        prefix = "";
     }
 
-    public PlayerData(Integer id, UUID playerId, String name, boolean tutorialFinished, Long banDuration, Long banStart, Long banIssued, String banReason, UUID bannedBy, long firstLogin, long lastLogin, long lastLogout, String ipAddress, int priority) {
+    public PlayerData(Integer id, UUID playerId, String name, boolean tutorialFinished, Long banDuration, Long banStart, Long banIssued, String banReason, UUID bannedBy, long firstLogin, long lastLogin, long lastLogout, String ipAddress, int priority, String prefix) {
         this.id = id;
         this.playerId = playerId;
         this.name = name;
@@ -51,6 +53,7 @@ public class PlayerData
         this.lastLogout = lastLogout;
         this.ipAddress = ipAddress;
         this.priority = priority;
+        this.prefix = prefix;
     }
 
     public Integer getId() {
@@ -163,5 +166,13 @@ public class PlayerData
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 }

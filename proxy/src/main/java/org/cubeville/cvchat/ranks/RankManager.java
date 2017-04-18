@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -14,6 +13,8 @@ import net.md_5.bungee.config.Configuration;
 public class RankManager
 {
     private List<Rank> ranks;
+    private Map<String, Prefix> prefixes;
+    
     // TODO: Optionally add cache
     
     private static RankManager instance;
@@ -21,24 +22,47 @@ public class RankManager
         return instance;
     }
     
-    public RankManager(Configuration config) {
+    public RankManager(Configuration config, Configuration prefixConfig) {
         instance = this;
-        
-        ranks = new ArrayList<>();
-        //playerPostfix = new HashMap<>();
-        //playerPriority = new HashMap<>();
-        
-        Collection<String> rankNames = config.getKeys();
-        for(String rankName: rankNames) {
-            Configuration rankConfig = (Configuration) config.get(rankName);
-            Rank rank = new Rank(rankConfig.getString("postfix"),
-                                 rankConfig.getString("permission"),
-                                 rankConfig.getInt("priority"),
-                                 rankConfig.getString("color"));
-            ranks.add(rank);
+
+        {
+            ranks = new ArrayList<>();
+            //playerPostfix = new HashMap<>();
+            //playerPriority = new HashMap<>();
+            
+            Collection<String> rankNames = config.getKeys();
+            for(String rankName: rankNames) {
+                Configuration rankConfig = (Configuration) config.get(rankName);
+                Rank rank = new Rank(rankConfig.getString("postfix"),
+                                     rankConfig.getString("permission"),
+                                     rankConfig.getInt("priority"),
+                                     rankConfig.getString("color"));
+                ranks.add(rank);
+            }
+        }
+
+        {
+            prefixes = new HashMap<>();
+            Collection<String> prefixNames = prefixConfig.getKeys();
+            for(String prefixName: prefixNames) {
+                Configuration c = (Configuration) prefixConfig.get(prefixName);
+                Prefix prefix = new Prefix(c.getString("prefix"), c.getString("permission"));
+                prefixes.put(prefixName, prefix);
+            }
+
         }
     }
 
+    public Map<String, String> getPossiblePrefixes(ProxiedPlayer player) {
+        Map<String, String> ret = new HashMap<>();
+        for(String prefix: prefixes.keySet()) {
+            if(player.hasPermission(prefixes.get(prefix).getPermission())) {
+                ret.put(prefix, prefixes.get(prefix).getPrefix());
+            }
+        }
+        return ret;
+    }
+    
     private Rank getRank(ProxiedPlayer player) {
         int prio = 0;
         Rank ret = null;

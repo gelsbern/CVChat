@@ -182,4 +182,17 @@ public class PlayerDataManager
         pd.setTutorialFinished(true);
         dao.updatePlayerData(pd);
     }
+
+    public String getPrefix(UUID player) {
+        PlayerData pd = playerData.get(player);
+        if(pd == null) return "";
+        return pd.getPrefix();
+    }
+
+    public void changePrefix(UUID player, String prefix) {
+        PlayerData pd = playerData.get(player);
+        if(pd == null) return;
+        pd.setPrefix(prefix);
+        dao.updatePlayerData(pd);
+    }
 }

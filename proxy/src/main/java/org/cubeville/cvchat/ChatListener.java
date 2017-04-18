@@ -1,6 +1,8 @@
 package org.cubeville.cvchat;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,7 +28,8 @@ public class ChatListener implements Listener, IPCInterface {
     private Set<String> commandWhitelistTutorial;
     private TextCommandManager textCommandManager;
     private Set<UUID> tutorialChatUnlocked;
-    
+    private Map<String, String> aliases;
+
     public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, CVIPC ipc) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
@@ -34,6 +37,16 @@ public class ChatListener implements Listener, IPCInterface {
         this.textCommandManager = textCommandManager;
         tutorialChatUnlocked = new HashSet<>();
         ipc.registerInterface("unlocktutorialchat", this);
+        aliases = new HashMap<>();
+        aliases.put("/rg claim", "/claim");
+        aliases.put("/region claim", "/claim");
+        aliases.put("/rg subzone", "/subzone");
+        aliases.put("/region subzone", "/subzone");
+        aliases.put("/w ", "/msg ");
+        aliases.put("/tell ", "/msg ");
+        aliases.put("/kill", "/suicide");
+        aliases.put("/instasmelt", "/smelt");
+        aliases.put("/night", "/ns");
     }
 
     public void unlockTutorialChat(UUID playerId) {
@@ -44,14 +57,14 @@ public class ChatListener implements Listener, IPCInterface {
         System.out.println("Unlock tutorial chat for player " + message);
         unlockTutorialChat(UUID.fromString(message));
     }
-    
+
     @EventHandler
     public void onChat(final ChatEvent event) {
         String name;
         if(event.getSender() instanceof ProxiedPlayer) name = ((ProxiedPlayer) event.getSender()).getDisplayName();
         else name = "Console";
         Logger.getInstance().logWithHeader(name + ": " + event.getMessage());
-        
+
         if (event.isCancelled()) return;
         if (!(event.getSender() instanceof ProxiedPlayer)) return;
         ProxiedPlayer player = (ProxiedPlayer)event.getSender();
@@ -62,15 +75,22 @@ public class ChatListener implements Listener, IPCInterface {
             event.setCancelled(true);
             return;
         }
-        
+
         if (event.isCommand()) {
             if(textCommandManager.executeTextCommand(player, event.getMessage())) {
                 event.setCancelled(true);
                 return;
             }
-        
-            if(player.hasPermission("cvchat.nowhitelist")) return;
+
+            for(String alias: aliases.keySet()) {
+                if(event.getMessage().toLowerCase().startsWith(alias)) {
+                    event.setMessage(aliases.get(alias) + event.getMessage().substring(alias.length()));
+                    break;
+                }
+            }
             
+            if(player.hasPermission("cvchat.nowhitelist")) return;
+
             String cmd = event.getMessage();
             int idx = cmd.indexOf(" ");
             if(idx != -1) cmd = cmd.substring(0, idx);

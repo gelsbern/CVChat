@@ -15,6 +15,7 @@ import net.md_5.bungee.api.CommandSender;
 import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.ranks.RankManager;
 import org.cubeville.cvchat.sanctions.SanctionManager;
+import org.cubeville.cvchat.playerdata.PlayerDataManager;
 
 public class Channel
 {
@@ -127,7 +128,9 @@ public class Channel
         }
         // TODO: Strip paragraph chars, convert colours if has permission to do so
         formattedMessage = formattedMessage.replace("%message%", message);
-        formattedMessage = formattedMessage.replace("%prefix%", "");
+        if(formattedMessage.indexOf("%prefix%") >= 0 && player instanceof ProxiedPlayer) {
+            formattedMessage = formattedMessage.replace("%prefix%", PlayerDataManager.getInstance().getPrefix(((ProxiedPlayer) player).getUniqueId()));
+        }
         if(formattedMessage.indexOf("%postfix%") >= 0) {
             if(player instanceof ProxiedPlayer) {
                 String postfix = RankManager.getInstance().getPostfix(player);

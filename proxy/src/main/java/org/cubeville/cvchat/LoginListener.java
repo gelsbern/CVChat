@@ -51,18 +51,18 @@ public class LoginListener implements Listener
             String type = pdm.isPermanentlyBanned(connection.getUniqueId()) ? "permanently" : "temporarily";
             event.setCancelReason("§cYou're " + type + " banned from this server.\n§eReason: §c" + pdm.getBanReason(connection.getUniqueId()));
         }
-        String[] whitelist = {"DoubleSammich", "Firesnuke", "LissaLaine", "_Tiffy_", "Raytheonx", "inutterable", "unixadmin", "pikeman327", "Nafartiti", "stldenise", "Herzz", "deanwin", "saemai", "A_cloud_ora", "Monoshish", "Monikorpse", "Clicki", "WallyDonkey", "BlueFirebolt", "Hjortshoej_", "Clicker27", "KitKathy", "Ptown16", "SeaGuy", "FrediW", "VicTheDonut", "Cade1390", "JimS996", "RandomRob13", "vic_torus", "Daugeas", "Sequoia", "SauceyTim", "CaveHuntress", "CreepingDespair", "_HunniB_", "TemperanceL", "Twilighta", "ACreepMaster"};
-        boolean whitelisted = false;
-        for(int i = 0; i < whitelist.length; i++) {
-            if(event.getConnection().getName().equals(whitelist[i])) {
-                whitelisted = true;
-                break;
-            }
-        }
-        if(!whitelisted) {
-            event.setCancelled(true);
-            event.setCancelReason("§cYou're not whitelisted on this server.");
-        }
+        //String[] whitelist = {"DoubleSammich", "Firesnuke", "LissaLaine", "_Tiffy_", "Raytheonx", "inutterable", "unixadmin", "pikeman327", "Nafartiti", "stldenise", "Herzz", "deanwin", "saemai", "A_cloud_ora", "Monoshish", "Monikorpse", "Clicki", "WallyDonkey", "BlueFirebolt", "Hjortshoej_", "Clicker27", "KitKathy", "Ptown16", "SeaGuy", "FrediW", "VicTheDonut", "Cade1390", "JimS996", "RandomRob13", "vic_torus", "Daugeas", "Sequoia", "SauceyTim", "CaveHuntress", "CreepingDespair", "_HunniB_", "TemperanceL", "Twilighta", "ACreepMaster"};
+        //boolean whitelisted = false;
+        //for(int i = 0; i < whitelist.length; i++) {
+        //if(event.getConnection().getName().equals(whitelist[i])) {
+        //      whitelisted = true;
+        //      break;
+        //  }
+        //}
+        //if(!whitelisted) {
+        //    event.setCancelled(true);
+        //    event.setCancelReason("§cPlease come back soon, we're gonna open momentarily.");
+        //}
 
     }
     

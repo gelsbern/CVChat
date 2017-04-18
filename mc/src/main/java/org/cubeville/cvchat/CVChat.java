@@ -1,6 +1,7 @@
 package org.cubeville.cvchat;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -25,11 +27,9 @@ import org.cubeville.cvipc.IPCInterface;
 
 public class CVChat extends JavaPlugin implements Listener, IPCInterface
 {
-	Set<String> ranks;
-	CVIPC ipc;
+    CVIPC ipc;
     
     public void onEnable() {
-    	ranks = getConfig().getConfigurationSection("ranks").getKeys(false);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(this, this);
 
@@ -43,23 +43,30 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
         ipc.deregisterInterface("chatquery");
     }
     
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
-        
-        String highestRank = "default";
-        Player player = event.getPlayer();
-        int prio = 0;
-        for (String rank : ranks) {
-            ConfigurationSection rankData = getConfig().getConfigurationSection("ranks").getConfigurationSection(rank);
-            if (player.hasPermission(rankData.getString("permission")) && rankData.getInt("priority") > prio) {
-                prio = rankData.getInt("priority");
-                highestRank = rank;
-            }
-        }
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard mainBoard = manager.getMainScoreboard();
-        mainBoard.getTeam(highestRank).addEntry(player.getName().toString());
+
+        // String highestRank = "default";
+        // Player player = event.getPlayer();
+        // int prio = 0;
+        // Set<String> ranks = getConfig().getConfigurationSection("ranks").getKeys(false);
+        // for (String rank : ranks) {
+        //     ConfigurationSection rankData = getConfig().getConfigurationSection("ranks").getConfigurationSection(rank);
+        //     if (player.hasPermission(rankData.getString("permission")) && rankData.getInt("priority") > prio) {
+        //         prio = rankData.getInt("priority");
+        //         highestRank = rank;
+        //     }
+        // }
+        // ScoreboardManager manager = Bukkit.getScoreboardManager();
+        // Scoreboard mainBoard = manager.getMainScoreboard();
+        // System.out.println("Set scoreboard team of player " + player.getName() + " to " + highestRank);
+        // if(mainBoard.getTeam(highestRank) != null) {
+        //     mainBoard.getTeam(highestRank).addEntry(player.getName().toString());
+        // }
+        // else {
+        //     System.out.println("Team not found on scoreboard!");
+        // }
     }
 
     @EventHandler
@@ -111,11 +118,24 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             if(player.getGameMode() == GameMode.SURVIVAL) health = player.getHealth();
             ipc.sendMessage("chatquery|" + channelName + "|" + mId + "|" + playerId.toString() + "|health=" + health);
         }
-        else {
+        else if(channel.equals("locchat")) {
             int idx = message.indexOf("|");
             if(idx == -1) return;
             
-            UUID playerId = UUID.fromString(message.substring(0, idx));
+            String idList = message.substring(0, idx);
+            int sidx = idList.indexOf(";");
+            UUID playerId;
+            Set<UUID> mutedIds = new HashSet<>();
+            if(sidx == -1) {
+                playerId = UUID.fromString(idList);
+            }
+            else {
+                playerId = UUID.fromString(idList.substring(0, sidx));
+                StringTokenizer tk = new StringTokenizer(idList.substring(sidx + 1), ",");
+                while(tk.hasMoreTokens()) {
+                    mutedIds.add(UUID.fromString(tk.nextToken()));
+                }
+            }
             message = message.substring(idx + 1);
             String greyMessage = "§7" + removeColorCodes(message);
             
@@ -130,7 +150,7 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
                     p.sendMessage(message);
                 }
                 else {
-                    if(p.hasPermission("cvchat.monitor.local")) {
+                    if(p.hasPermission("cvchat.monitor.local") && false == mutedIds.contains(p.getUniqueId())) {
                         p.sendMessage(greyMessage);
                     }
                 }

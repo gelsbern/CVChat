@@ -25,7 +25,7 @@ public class WhoCommand extends Command
 
         if(args.length > 1) {
             sender.sendMessage("§cToo many arguments.");
-            sender.sendMessage("/who [filter]");
+            sender.sendMessage("§c/who [filter]");
             return;
         }
 

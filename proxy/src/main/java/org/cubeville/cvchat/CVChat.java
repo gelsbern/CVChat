@@ -47,6 +47,7 @@ import org.cubeville.cvchat.commands.RlCommand;
 import org.cubeville.cvchat.commands.TempbanCommand;
 import org.cubeville.cvchat.commands.TestCommand;
 import org.cubeville.cvchat.commands.TpidCommand;
+import org.cubeville.cvchat.commands.TrCommand;
 import org.cubeville.cvchat.commands.UnbanCommand;
 import org.cubeville.cvchat.commands.UnclaimCommand;
 import org.cubeville.cvchat.commands.UnmuteCommand;
@@ -186,6 +187,7 @@ public class CVChat extends Plugin {
                 // other commands
                 pm.registerCommand(this, new PrefixCommand());
                 pm.registerCommand(this, new LocalCommand(local));
+                pm.registerCommand(this, new TrCommand());
             }
 
             { // Install playerdata system

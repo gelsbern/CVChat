@@ -89,7 +89,13 @@ public class GroupChannel extends Channel
         if(group == null) return null;
         List<ProxiedPlayer> members = new ArrayList<>();
         for(UUID member: groupMembers.get(group)) {
-            members.add(ProxyServer.getInstance().getPlayer(member));
+            Player memberPlayer = ProxyServer.getInstance().getPlayer(member);
+            if(memberPlayer == null) {
+                System.out.println("Group member " + member.toString() + " is not online.");
+            }
+            else {
+                members.add(ProxyServer.getInstance().getPlayer(member));
+            }
         }
         return members;
     }

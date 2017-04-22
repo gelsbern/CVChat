@@ -2,16 +2,23 @@ package org.cubeville.cvchat;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,6 +29,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.util.Vector;
+
 import org.cubeville.cvipc.CVIPC;
 import org.cubeville.cvipc.IPCInterface;
 
@@ -119,6 +128,8 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             ipc.sendMessage("chatquery|" + channelName + "|" + mId + "|" + playerId.toString() + "|health=" + health);
         }
         else if(channel.equals("locchat")) {
+            System.out.println("Localchat message: " + message);
+
             int idx = message.indexOf("|");
             if(idx == -1) return;
             
@@ -155,6 +166,19 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
                     }
                 }
             }
+
+            int gtidx = message.indexOf(">");
+            if(gtidx != -1) {
+                if(message.substring(gtidx + 2).equals("fus") && player.hasPermission("cvchat.thuum.fus")) {
+                    fusRoDah(player, 1);
+                }
+                else if(message.substring(gtidx + 2).equals("fus ro") && player.hasPermission("cvchat.thuum.fus.ro")) {
+                    fusRoDah(player, 2);
+                }
+                else if(message.substring(gtidx + 2).equals("fus ro dah") && player.hasPermission("cvchat.thuum.fus.ro.dah")) {
+                    fusRoDah(player, 3);
+                }
+            }
         }
     }
 
@@ -165,5 +189,54 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             ret = ret.replace("§" + colorCodes[i], "");
         }
         return ret;
+    }
+
+    private void fusRoDah(Player dragonBorn, int level) {
+        System.out.println("Fus ro level " + level);
+        final double fusHoriStrength[] = {.5,2,7};
+        final double fusVertStrength[] = {.5,.7,1.5};
+        
+        int distance = 5 * level;
+        Vector heading = dragonBorn.getEyeLocation().getDirection();
+
+        Vector blastVector = new Vector();
+        blastVector.copy(heading).setY(0).normalize();
+        blastVector.multiply(fusHoriStrength[level-1]).setY(fusVertStrength[level-1]);
+        for(Entity victim : getAreaOfEffect(dragonBorn, 4, distance)) {
+            victim.setVelocity(victim.getVelocity().add(blastVector));
+        }
+
+        dragonBorn.getWorld().playEffect(dragonBorn.getLocation(), Effect.GHAST_SHOOT, 0, distance + 10);
+        if (level >= 2) {
+            World world = dragonBorn.getWorld();
+            List<Block> sight = dragonBorn.getLineOfSight(new HashSet<Material>(), 4);
+            if (sight.size() >=0 ) world.createExplosion(sight.get(sight.size() - 1).getLocation(),0);
+        }
+
+        //if (level == 3){
+            //List<Block> sight = dragonBorn.getLineOfSight(new HashSet<Material>(), 32);
+            //for(int i = 8; i < 32 && i < sight.size() ; i += 6){
+            //  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Explosion(sight.get(i).getLocation(), 0, false), i/3);
+            //}
+
+        //}
+    }
+
+    private List<Entity> getAreaOfEffect(Player dragonBorn, int radius, int length){
+        Location epicenter = dragonBorn.getEyeLocation();
+        Vector heading = epicenter.getDirection();
+        List<Entity> returnMe = new LinkedList<Entity>();
+        
+        length *= 2;
+        for(Entity victim : dragonBorn.getNearbyEntities(length, length, length)){
+            Vector dragonBornToVictim = victim.getLocation().subtract(epicenter).toVector();
+            double dotProduct = dragonBornToVictim.dot(heading);
+            
+            if(dotProduct < 0) continue; // This entity is behind the dovahkiin
+            if(dragonBornToVictim.lengthSquared() - dotProduct * dotProduct > radius*radius) continue; // Entity is too far laterally from the shout.
+            
+            returnMe.add(victim);
+        }
+        return returnMe;
     }
 }

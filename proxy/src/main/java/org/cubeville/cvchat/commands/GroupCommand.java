@@ -47,6 +47,7 @@ public class GroupCommand extends Command
                     return;
                 }
             }
+            channel.leaveGroup(player);
             boolean newGroup = channel.addPlayerToGroup(groupPlayer, player);
             player.sendMessage("§9[Group]§rYou have joined §6" + groupPlayer.getDisplayName() + "§r's group.");
             ChannelManager.getInstance().saveStatus(player);

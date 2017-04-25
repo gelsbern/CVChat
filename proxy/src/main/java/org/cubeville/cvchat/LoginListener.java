@@ -1,6 +1,8 @@
 package org.cubeville.cvchat;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 
 import net.md_5.bungee.api.ProxyServer;
@@ -48,21 +50,15 @@ public class LoginListener implements Listener
         PendingConnection connection = event.getConnection();
         if(pdm.isBanned(connection.getUniqueId(), true)) {
             event.setCancelled(true);
-            String type = pdm.isPermanentlyBanned(connection.getUniqueId()) ? "permanently" : "temporarily";
-            event.setCancelReason("§cYou're " + type + " banned from this server.\n§eReason: §c" + pdm.getBanReason(connection.getUniqueId()));
+            boolean perm = pdm.isPermanentlyBanned(connection.getUniqueId());
+            String type = perm ? "permanently" : "temporarily";
+            String endOfBan = "";
+            if(!perm) {
+                SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss z");
+                endOfBan = " until §e" + sdf.format(new Date(pdm.getEndOfTempban(connection.getUniqueId())));
+            }
+            event.setCancelReason("§cYou're " + type + " banned from this server" + endOfBan + ".\n§cReason: §e" + pdm.getBanReason(connection.getUniqueId()));
         }
-        //String[] whitelist = {"DoubleSammich", "Firesnuke", "LissaLaine", "_Tiffy_", "Raytheonx", "inutterable", "unixadmin", "pikeman327", "Nafartiti", "stldenise", "Herzz", "deanwin", "saemai", "A_cloud_ora", "Monoshish", "Monikorpse", "Clicki", "WallyDonkey", "BlueFirebolt", "Hjortshoej_", "Clicker27", "KitKathy", "Ptown16", "SeaGuy", "FrediW", "VicTheDonut", "Cade1390", "JimS996", "RandomRob13", "vic_torus", "Daugeas", "Sequoia", "SauceyTim", "CaveHuntress", "CreepingDespair", "_HunniB_", "TemperanceL", "Twilighta", "ACreepMaster"};
-        //boolean whitelisted = false;
-        //for(int i = 0; i < whitelist.length; i++) {
-        //if(event.getConnection().getName().equals(whitelist[i])) {
-        //      whitelisted = true;
-        //      break;
-        //  }
-        //}
-        //if(!whitelisted) {
-        //    event.setCancelled(true);
-        //    event.setCancelReason("§cPlease come back soon, we're gonna open momentarily.");
-        //}
 
     }
     

@@ -110,6 +110,12 @@ public class Util
         return (BungeeTabListPlus.isHidden(BungeeTabListPlus.getInstance().getConnectedPlayerManager().getPlayer(player)));
     }
 
+    public static boolean playerIsHidden(UUID playerId) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerId);
+        if(player == null) return false;
+        return playerIsHidden(player);
+    }
+    
     public static List<ProxiedPlayer> getPlayersWithPermission(String permission) {
         List<ProxiedPlayer> ret = new ArrayList<>();
         for(ProxiedPlayer player: ProxyServer.getInstance().getPlayers()) {

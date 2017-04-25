@@ -138,7 +138,8 @@ public class ChatListener implements Listener, IPCInterface {
                c.startsWith("/unmute") ||
                c.startsWith("/oi") ||
                c.startsWith("/oe") ||
-               c.startsWith("/note")) {
+               c.startsWith("/note") ||
+               c.startsWith("/doc")) {
                 for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
                     if(!Util.playerIsHidden(p)) {
                         String pname = Util.removeColorCodes(p.getDisplayName());

@@ -16,6 +16,7 @@ import org.cubeville.cvipc.CVIPC;
 import org.cubeville.cvipc.IPCInterface;
 
 import org.cubeville.cvchat.CVChat;
+import org.cubeville.cvchat.Util;
 
 public class TicketManager implements IPCInterface
 {
@@ -118,9 +119,21 @@ public class TicketManager implements IPCInterface
             if(ticket.isClosed() == closed && ticket.isHeld() == held) {
                 cnt++;
                 if(cnt / pageSize + 1 == page) {
-                    String text = ticket.getText();
-                    if(text.length() > 20) { text = text.substring(0, 20) + "..."; }
-                    out.add("§6#" + ticket.getId() + ". " + getDateStr(ticket.getCreationTimestamp()) + " by §c" + ticket.getPlayerName() + " - §7" + text);
+                    String text;
+                    if(ticket.isClaimed()) {
+                        text = "§dClaimed by " + ticket.getModeratorName();
+                    }
+                    else {
+                        text = "§7" + ticket.getText();
+                    }
+                    if(text.length() > 22) { text = text.substring(0, 22) + "§7..."; }
+                    boolean playerOnline = false;
+                    if(ProxyServer.getInstance().getPlayer(ticket.getPlayer()) != null) {
+                        if(!Util.playerIsHidden(ticket.getPlayer())) {
+                            playerOnline = true;
+                        }
+                    }
+                    out.add("§6#" + ticket.getId() + ". " + getDateStr(ticket.getCreationTimestamp()) + " by §" + (playerOnline ? "a" : "c") + ticket.getPlayerName() + " §7- " + text);
                 }
             }
         }

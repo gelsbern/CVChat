@@ -58,6 +58,12 @@ public class PlayerDataManager
         return false;
     }
 
+    public long getEndOfTempban(UUID playerId) {
+        PlayerData pd = playerData.get(playerId);
+        if(pd == null) return System.currentTimeMillis();
+        return pd.getBanStart() + pd.getBanDuration();
+    }
+    
     public boolean isPermanentlyBanned(UUID playerId) {
         PlayerData pd = playerData.get(playerId);
         if(pd == null) return false;

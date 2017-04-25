@@ -4,12 +4,12 @@ import net.md_5.bungee.api.CommandSender;
 
 import org.cubeville.cvchat.tickets.TicketManager;
 
-public class UnclaimCommand extends CommandBase
+public class BacksiesCommand extends CommandBase
 {
     TicketManager ticketManager;
     
-    public UnclaimCommand(TicketManager ticketManager) {
-        super("unclaim");
+    public BacksiesCommand(TicketManager ticketManager) {
+        super("backsies");
         this.ticketManager = ticketManager;
         // TODO: What about some permissions?
     }
@@ -26,7 +26,7 @@ public class UnclaimCommand extends CommandBase
         }
         else {
             commandSender.sendMessage("§cWrong number of arguments.");
-            commandSender.sendMessage("§c/unclaim <modreq-id>");
+            commandSender.sendMessage("§c/backsies <modreq-id>");
         }
     }
 }

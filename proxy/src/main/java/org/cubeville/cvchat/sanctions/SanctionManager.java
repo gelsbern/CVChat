@@ -44,10 +44,13 @@ public class SanctionManager
         }
     }
 
-    public void banPlayer(CommandSender sender, UUID bannedPlayerId, String banReason, long duration, boolean silent) {
+    public boolean banPlayer(CommandSender sender, UUID bannedPlayerId, String banReason, long duration, boolean silent) {
         UUID senderId = null;
         if(sender instanceof ProxiedPlayer) senderId = ((ProxiedPlayer) sender).getUniqueId();
         PlayerDataManager pdm = PlayerDataManager.getInstance();
+
+        if(duration == 0 && pdm.isBanned(bannedPlayerId, false) && pdm.isPermanentlyBanned(bannedPlayerId)) return false;
+        
         pdm.banPlayer(bannedPlayerId, senderId, banReason, duration * 1000);
         {
             ProxiedPlayer player = ProxyServer.getInstance().getPlayer(bannedPlayerId);
@@ -57,6 +60,7 @@ public class SanctionManager
                 player.disconnect("§6You have been " + (duration != 0 ? "temporarily " : "") + "banned by §e" + kname + "§6.\nReason: §e" + banReason);
             }
         }
+        return true;
     }
 
     public String unbanPlayer(CommandSender sender, String bannedPlayerName, boolean silent) {
@@ -81,6 +85,24 @@ public class SanctionManager
         for(int i = 0; i < message.length(); i++) {
             if(message.charAt(i) >= 'A' && message.charAt(i) <= 'Z') cnt++;
             if(cnt > maxcnt) return true;
+        }
+        return false;
+    }
+
+    public boolean checkSpam(String message) {
+        if(message.length() < 10) return false;
+        String s = message.toLowerCase();
+        int cnt = 0;
+        char lastchar = 0;
+        for(int i = 0; i < s.length(); i++) {
+            if(s.charAt(i) == lastchar) {
+                cnt++;
+                if(cnt >= 5) return true;
+            }
+            else {
+                lastchar = s.charAt(i);
+                cnt = 0;
+            }
         }
         return false;
     }

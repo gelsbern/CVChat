@@ -15,16 +15,13 @@ import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
 import org.cubeville.cvchat.ranks.RankManager;
 
-public class ModlistCommand extends Command
+public class ModlistCommand extends CommandBase
 {
     public ModlistCommand() {
         super("modlist", null);
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
-        if(!(commandSender instanceof ProxiedPlayer)) return;
-        ProxiedPlayer sender = (ProxiedPlayer) commandSender;
-
+    public void execute(CommandSender sender, String[] args) {
         if(args.length > 1) {
             sender.sendMessage("§cToo many arguments.");
             sender.sendMessage("/modlist [filter]");
@@ -37,7 +34,7 @@ public class ModlistCommand extends Command
             if(RankManager.getInstance().getPriority(player) >= 20) {
                 if(args.length == 0 || player.getDisplayName().toUpperCase().indexOf(args[0].toUpperCase()) >= 0) {
                     boolean vis = !Util.playerIsHidden(player);
-                    boolean hvis = (player.getUniqueId().equals(sender.getUniqueId())) || (sender.hasPermission("cvchat.showvanished"));
+                    boolean hvis = (isPlayerEqual(sender, player) || (sender.hasPermission("cvchat.showvanished")));
                     if(vis || hvis) {
                         if(list.length() > 0) list += "§r, ";
                         list += "§" + RankManager.getInstance().getColor(player);

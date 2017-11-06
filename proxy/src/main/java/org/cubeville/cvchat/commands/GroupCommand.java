@@ -82,8 +82,10 @@ public class GroupCommand extends Command
             Collection<ProxiedPlayer> members = channel.getGroupMembers(player);
             String list = "";
             for(ProxiedPlayer member: members) {
-                if(list.length() > 0) list += "§r, ";
-                list += member.getDisplayName();
+                if(!Util.playerIsHidden(member)) {
+                    if(list.length() > 0) list += "§r, ";
+                    list += member.getDisplayName();
+                }
             }
             player.sendMessage("§9[Group]§rMembers online: " + list);
         }

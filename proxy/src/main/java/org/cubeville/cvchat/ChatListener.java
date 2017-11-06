@@ -30,15 +30,18 @@ public class ChatListener implements Listener, IPCInterface {
     private Set<UUID> tutorialChatUnlocked;
     private Map<String, String> aliases;
 
+    private CVIPC cvipc;
+    
     public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, CVIPC ipc) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
         this.commandWhitelistTutorial = commandWhitelistTutorial;
         this.textCommandManager = textCommandManager;
         tutorialChatUnlocked = new HashSet<>();
+        this.cvipc = ipc;
         ipc.registerInterface("unlocktutorialchat", this);
         aliases = new HashMap<>();
-        aliases.put("/rg claim", "/claim");
+        aliases.put("/rg claim", "/claim"); // TODO: welp...
         aliases.put("/region claim", "/claim");
         aliases.put("/rg subzone", "/subzone");
         aliases.put("/region subzone", "/subzone");
@@ -47,6 +50,9 @@ public class ChatListener implements Listener, IPCInterface {
         aliases.put("/kill", "/suicide");
         aliases.put("/instasmelt", "/smelt");
         aliases.put("/night", "/ns");
+        aliases.put("/repair", "/rp");
+        aliases.put("/hub", "/ptp hub");
+        aliases.put("/tut", "/ptp tut");
     }
 
     public void unlockTutorialChat(UUID playerId) {
@@ -54,7 +60,6 @@ public class ChatListener implements Listener, IPCInterface {
     }
 
     public void process(String serverName, String channel, String message) {
-        System.out.println("Unlock tutorial chat for player " + message);
         unlockTutorialChat(UUID.fromString(message));
     }
 
@@ -69,8 +74,11 @@ public class ChatListener implements Listener, IPCInterface {
         if (!(event.getSender() instanceof ProxiedPlayer)) return;
         ProxiedPlayer player = (ProxiedPlayer)event.getSender();
 
+        String serverName = player.getServer().getInfo().getName();
+        cvipc.sendMessage(serverName, "afktrigger|" + player.getUniqueId());
+        
         boolean finishedTutorial = PlayerDataManager.getInstance().finishedTutorial(player.getUniqueId());
-        if(finishedTutorial == false && tutorialChatUnlocked.contains(player.getUniqueId()) == false) {
+        if(finishedTutorial == false && tutorialChatUnlocked.contains(player.getUniqueId()) == false && player.hasPermission("cvchat.bypasstutorial") == false) {
             player.sendMessage("§cNo permission. Please proceed first.");
             event.setCancelled(true);
             return;
@@ -92,6 +100,13 @@ public class ChatListener implements Listener, IPCInterface {
             if(player.hasPermission("cvchat.nowhitelist")) return;
 
             String cmd = event.getMessage();
+
+            if(cmd.toLowerCase().startsWith("/home")) {
+                cmd = "/home";
+                event.setMessage("/home");
+                return;
+            }
+            
             int idx = cmd.indexOf(" ");
             if(idx != -1) cmd = cmd.substring(0, idx);
             cmd = cmd.substring(1);
@@ -115,6 +130,17 @@ public class ChatListener implements Listener, IPCInterface {
         event.setCancelled(true);
 
         String message = Util.removeSectionSigns(event.getMessage());
+        if(Util.playerIsHidden(player)) {
+            if(message.endsWith("/")) {
+                message = message.substring(0, message.length() - 1);
+                if(message.length() == 0) return;
+            }
+            else {
+                player.sendMessage("§cAdd a / to speak in local chat when you're in /v.");
+                return;
+            }
+        }
+
         localChannel.sendMessage(player, message);
     }
 
@@ -127,25 +153,38 @@ public class ChatListener implements Listener, IPCInterface {
         if(lastSpace != -1) {
             String c = event.getCursor();
             String lastWord = c.substring(lastSpace + 1);
-            if(c.startsWith("/msg ") ||
-               c.startsWith("/tp") || // TODO: Check permission of commands for player or, at least the whitelist
-               c.startsWith("/bring") ||
-               c.startsWith("/profile") ||
-               c.startsWith("/ban") ||
-               c.startsWith("/tempban") ||
-               c.startsWith("/kick") ||
-               c.startsWith("/mute") ||
-               c.startsWith("/unmute") ||
-               c.startsWith("/oi") ||
-               c.startsWith("/oe") ||
-               c.startsWith("/note") ||
-               c.startsWith("/doc")) {
+            if(c.startsWith("/msg ") || // TODO: welp...
+               c.startsWith("/tp ") || // TODO: Check permission of commands for player or, at least the whitelist
+               c.startsWith("/bring ") ||
+               c.startsWith("/profile ") ||
+               c.startsWith("/ban ") ||
+               c.startsWith("/tempban ") ||
+               c.startsWith("/kick ") ||
+               c.startsWith("/mute ") ||
+               c.startsWith("/unmute ") ||
+               c.startsWith("/oi ") ||
+               c.startsWith("/oe ") ||
+               c.startsWith("/note ") ||
+               c.startsWith("/doc ") ||
+               c.startsWith("/money ") ||
+               c.startsWith("/su ") ) {
                 for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
                     if(!Util.playerIsHidden(p)) {
                         String pname = Util.removeColorCodes(p.getDisplayName());
                         if(pname.toLowerCase().startsWith(lastWord.toLowerCase())) {
                             event.getSuggestions().add(pname);
                         }
+                    }
+                }
+            }
+        }
+        else {
+            String c = event.getCursor();
+            if(c.startsWith("/")) {
+                c = c.substring(1);
+                for(String cmd: commandWhitelist) {
+                    if(cmd.startsWith(c)) {
+                        event.getSuggestions().add("/" + cmd + " ");
                     }
                 }
             }

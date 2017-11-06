@@ -7,6 +7,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
+import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
 
 public class RCommand extends Command
@@ -32,9 +33,11 @@ public class RCommand extends Command
         }
 
         ProxiedPlayer recipient = ProxyServer.getInstance().getPlayer(recipientId);
-        if(recipient == null) {
+        boolean fakeNotFound = false;
+        if(recipient == null || (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false)) {
             sender.sendMessage("§cPlayer left.");
-            return;
+            if(recipient == null) return;
+            fakeNotFound = true;
         }
 
         if(SanctionManager.getInstance().isPlayerMuted(sender)) {
@@ -44,6 +47,6 @@ public class RCommand extends Command
             }
         }
 
-        MsgCommand.sendMessage(sender, recipient, args, 0);
+        MsgCommand.sendMessage(sender, recipient, args, 0, fakeNotFound);
     }
 }

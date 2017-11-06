@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
+import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
 
 public class RlCommand extends CommandBase
@@ -24,15 +25,20 @@ public class RlCommand extends CommandBase
         if(!verifyNotLessArguments(sender, args, 1)) return;
 
         UUID recipientId = MsgCommand.getLastMessageSent(sender.getUniqueId());
-        if(!verify(sender, recipientId != null, "§cNo message sent yet."));
+        if(!verify(sender, recipientId != null, "§cNo message sent yet.")) return;
 
         ProxiedPlayer recipient = ProxyServer.getInstance().getPlayer(recipientId);
-        if(!verify(sender, recipient != null, "§cPlayer left."));
+        boolean fakeNotFound = false;
+        if(recipient == null || (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false)) {
+            sender.sendMessage("§cPlayer left.");
+            if(recipient == null) return;
+            fakeNotFound = true;
+        }
 
         if(SanctionManager.getInstance().isPlayerMuted(sender)) {
             if(!verify(sender, recipient.hasPermission("cvchat.mute.staff"), "§cYou are muted. You can only send messages to staff members.")) return;
         }
         
-        MsgCommand.sendMessage(sender, recipient, args, 0);
+        MsgCommand.sendMessage(sender, recipient, args, 0, fakeNotFound);
     }
 }

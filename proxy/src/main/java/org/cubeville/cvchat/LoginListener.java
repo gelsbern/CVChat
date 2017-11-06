@@ -6,11 +6,13 @@ import java.util.Date;
 import java.util.UUID;
 
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -34,6 +36,14 @@ public class LoginListener implements Listener
     @EventHandler
     public void onPreLogin(final PreLoginEvent event) {
         String playerName = event.getConnection().getName();
+        int protocolVersion = event.getConnection().getVersion();
+        if(protocolVersion != 316) {
+            event.setCancelled(true);
+            String currentVersion = "Undeterminable";
+            if(protocolVersion >= 335) currentVersion = "1.12 or newer";
+            if(protocolVersion <= 210) currentVersion = "1.10 or older";
+            event.setCancelReason("§cPlease use §aMinecraft v1.11.2 §cfor Cubeville.\nYou're currently using: §e" + currentVersion);
+        }
         Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
         for(ProxiedPlayer p: players) {
             if(playerName.equals(p.getName())) {
@@ -99,14 +109,18 @@ public class LoginListener implements Listener
 
         ticketManager.playerLogin(player);
         
-        System.out.println("Check if player logging in has finished the tutorial.");
         if(!pdm.finishedTutorial(playerId)) {
-            System.out.println("Setting login location to tutorial for player " + player.getDisplayName());
             channelManager.getIPC().sendMessage("newskylands", "xwportal|" + playerId + "|portal:TutorialSpawn|newskylands");
         }
-        else {
-            System.out.println("Player has already finished the tutorial.");
+
+        if(player.hasPermission("cvchat.ticket")) {
+            int cnt = ticketManager.getNumberOfOpenTickets();
+            if(cnt > 0) {
+                player.sendMessage("§a" + cnt + " open modreq(s).");
+            }
         }
+
+        System.out.println("Player " + player.getName() + " logged in.");
     }
 
     private String getStrippedIpAddress(ProxiedPlayer player) {
@@ -126,8 +140,22 @@ public class LoginListener implements Listener
             sendSilentMessage(player.getDisplayName(), "left");
         }
         PlayerDataManager.getInstance().playerLogout(player.getUniqueId());
+        System.out.println("Player " + player.getName() + " logged off.");
     }
 
+    @EventHandler
+    public void onProxyPing(final ProxyPingEvent event) {
+        ServerPing ping = event.getResponse();
+        int cnt = 0;
+        for(ProxiedPlayer player: ProxyServer.getInstance().getPlayers()) {
+            if(!Util.playerIsHidden(player)) {
+                cnt++;
+            }
+        }
+        ping.getPlayers().setOnline(cnt);
+        ping.getPlayers().setSample(new ServerPing.PlayerInfo[0]);
+    }
+    
     private void sendMessage(String playerName, String status) {
         for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
             p.sendMessage("§e" + playerName + "§e " + status + " the game.");

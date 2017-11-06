@@ -9,7 +9,7 @@ public class BacksiesCommand extends CommandBase
     TicketManager ticketManager;
     
     public BacksiesCommand(TicketManager ticketManager) {
-        super("backsies");
+        super("backsies", "cvchat.ticket");
         this.ticketManager = ticketManager;
         // TODO: What about some permissions?
     }

@@ -30,7 +30,27 @@ public class ProfileCommand extends CommandBase
 
         UUID playerId = getPDM().getPlayerId(args[0]);
         if(playerId == null) {
-            sender.sendMessage("§cPlayer not found.");
+            List<String> searchNames = getPDM().getMatchingPlayerNames(args[0]);
+            if(searchNames.size() == 0 || args[0].length() < 4) {
+                sender.sendMessage("§cPlayer not found.");
+            }
+            else {
+                String n = "";
+                for(String name: searchNames) {
+                    if(n.length() > 0) n += ", ";
+                    if(n.length() >= 150) {
+                        n += "... ";
+                        break;
+                    }
+                    n += name;
+                }
+                if(n.length() > 0) {
+                    sender.sendMessage("§cPlayer not found. Did you mean §a" + n + "?");
+                }
+                else {
+                    sender.sendMessage("§cPlayer not found.");
+                }
+            }
             return;
         }
         if(!sender.hasPermission("cvchat.profile.unlimited")) {
@@ -65,7 +85,7 @@ public class ProfileCommand extends CommandBase
             else if(diff < 1209600) {
                 lastOnline += String.valueOf(diff / 86400) + " days ago";
             }
-            else if(diff < 4838400) {
+            else if(diff < 5356800) {
                 lastOnline += String.valueOf(diff / 604800) + " weeks ago";
             }
             else {

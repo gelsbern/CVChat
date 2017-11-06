@@ -118,16 +118,16 @@ public class Channel
                     return;
                 }
             }
+            if(SanctionManager.getInstance().checkSpam(message)) {
+                if(!player.hasPermission("cvchat.bypasscapsfilter")) {
+                    player.sendMessage("§cPlease avoid repetition of the same character or character sequence, message filtered.");
+                    return;
+                }
+            }
         }
         
         String formattedMessage = format;
 
-        message.replace("§", "");
-        if(colorPermission.equals("default") || player.hasPermission(colorPermission)) {
-            message = Util.translateAlternateColorCodes(message);
-        }
-        // TODO: Strip paragraph chars, convert colours if has permission to do so
-        formattedMessage = formattedMessage.replace("%message%", message);
         if(formattedMessage.indexOf("%prefix%") >= 0 && player instanceof ProxiedPlayer) {
             formattedMessage = formattedMessage.replace("%prefix%", PlayerDataManager.getInstance().getPrefix(((ProxiedPlayer) player).getUniqueId()));
         }
@@ -146,6 +146,12 @@ public class Channel
         else {
             formattedMessage = formattedMessage.replace("%player%", "Console");
         }
+
+        message.replace("§", "");
+        if(colorPermission.equals("default") || player.hasPermission(colorPermission)) {
+            message = Util.translateAlternateColorCodes(message);
+        }
+        formattedMessage = formattedMessage.replace("%message%", message);
 
         if(formattedMessage.indexOf("%health%") >= 0) {
             if(player instanceof ProxiedPlayer) {

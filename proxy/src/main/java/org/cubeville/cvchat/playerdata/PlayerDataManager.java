@@ -1,6 +1,8 @@
 package org.cubeville.cvchat.playerdata;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -79,6 +81,16 @@ public class PlayerDataManager
     public UUID getPlayerId(String playerName) {
         return playerNameMap.get(playerName.toLowerCase());
     }
+
+    public List<String> getMatchingPlayerNames(String search) {
+        List<String> ret = new ArrayList<>();
+        for(String name: playerNameMap.keySet()) {
+            if(name.contains(search.toLowerCase())) {
+                ret.add(playerData.get(playerNameMap.get(name)).getName());
+            }
+        }
+        return ret;
+    }
     
     public void banPlayer(UUID playerId, UUID bannedBy, String banReason, long duration) {
         PlayerData pd = playerData.get(playerId);
@@ -150,6 +162,12 @@ public class PlayerDataManager
         return pd.getLastLogout();
     }
 
+    public long getFirstLogin(UUID playerId) {
+        PlayerData pd = playerData.get(playerId);
+        if(pd == null) return 0;
+        return pd.getFirstLogin();
+    }
+    
     public int getPriority(UUID playerId) {
         PlayerData pd = playerData.get(playerId);
         if(pd == null) return 0;
@@ -164,6 +182,14 @@ public class PlayerDataManager
         return sd.getPriority() > pd.getPriority();
     }
 
+    public boolean outranksOrEqual(UUID sender, UUID player) {
+        PlayerData sd = playerData.get(sender);
+        if(sd == null) return false;
+        PlayerData pd = playerData.get(player);
+        if(pd == null) return false;
+        return sd.getPriority() >= pd.getPriority();
+    }
+    
     public String getIPAddress(UUID player) {
         PlayerData pd = playerData.get(player);
         if(pd == null) return null;

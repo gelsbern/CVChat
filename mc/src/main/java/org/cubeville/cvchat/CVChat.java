@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -101,11 +102,31 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
 
             Location loc = player.getLocation();
             ipc.sendMessage("modreq", player.getUniqueId() + "|" + loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "|" + text);
+            return true;
         }
         else if(command.getName().equals("unlocktutorialchat")) {
             if(!(sender instanceof Player)) return false;
             Player player = (Player) sender;
             ipc.sendMessage("unlocktutorialchat", player.getUniqueId().toString());
+            return true;
+        }
+        else if(command.getName().equals("ltr")) {
+            if(!(sender instanceof Player)) return false;
+            Player player = (Player) sender;
+
+            if(args.length == 0) return true;
+            Collection<Player> players = (Collection<Player>) getServer().getOnlinePlayers();
+            String message = args[0];
+            for(int i = 1; i < args.length; i++) message += " " + args[i];
+            message = ChatColor.translateAlternateColorCodes('&', message);
+            Location loc = player.getLocation();
+            for(Player p: players) {
+                Location pl = p.getLocation();
+                if(pl.getWorld().getUID().equals(loc.getWorld().getUID()) && pl.distance(loc) < 55) {
+                    p.sendMessage(message);
+                }
+            }
+            return true;
         }
         return false;
     }
@@ -128,8 +149,6 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             ipc.sendMessage("chatquery|" + channelName + "|" + mId + "|" + playerId.toString() + "|health=" + health);
         }
         else if(channel.equals("locchat")) {
-            System.out.println("Localchat message: " + message);
-
             int idx = message.indexOf("|");
             if(idx == -1) return;
             
@@ -155,18 +174,26 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             Location loc = player.getLocation();
             
             Collection<Player> players = (Collection<Player>) getServer().getOnlinePlayers();
+            int recipientCount = 0;
             for(Player p: players) {
                 Location pl = p.getLocation();
                 if(pl.getWorld().getUID().equals(loc.getWorld().getUID()) && pl.distance(loc) < 55) {
                     p.sendMessage(message);
+                    recipientCount++;
                 }
-                else {
+            }
+            for(Player p: players) {
+                Location pl = p.getLocation();
+                boolean sameworld = pl.getWorld().getUID().equals(loc.getWorld().getUID());
+                if(sameworld == false || pl.distance(loc) >= 55) {
                     if(p.hasPermission("cvchat.monitor.local") && false == mutedIds.contains(p.getUniqueId())) {
-                        p.sendMessage(greyMessage);
+                        String m = greyMessage;
+                        if(recipientCount <= 1) m += " §4*";
+                        p.sendMessage(m);
                     }
                 }
             }
-
+            
             int gtidx = message.indexOf(">");
             if(gtidx != -1) {
                 if(message.substring(gtidx + 2).equals("fus") && player.hasPermission("cvchat.thuum.fus")) {

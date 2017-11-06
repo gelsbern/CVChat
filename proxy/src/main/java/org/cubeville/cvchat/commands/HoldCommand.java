@@ -25,7 +25,7 @@ public class HoldCommand extends CommandBase
             ticketManager.holdTicket(commandSender, id);
         }
         catch (NumberFormatException e) {
-            commandSender.sendMessage("§cInvalid ticket id.");                
+            commandSender.sendMessage("§cInvalid ticket id.");
             return;
         }
     }

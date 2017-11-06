@@ -8,7 +8,7 @@ import net.md_5.bungee.api.plugin.Command;
 import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
 
-public class UnmuteCommand extends Command
+public class UnmuteCommand extends CommandBase
 {
     public UnmuteCommand() {
         super("unmute");
@@ -30,6 +30,13 @@ public class UnmuteCommand extends Command
             return;
         }
 
+        if(!verify(sender, !player.getUniqueId().equals(sender.getUniqueId()), "§cYou can't unmute yourself.")) return;
+
+        if(!verifyOutranks(sender, player)) {
+            sender.sendMessage("§cNo permission.");
+            return;
+        }
+        
         if(!getSanctionManager().isPlayerMuted(player)) {
             sender.sendMessage("§cPlayer is not muted.");
             return;

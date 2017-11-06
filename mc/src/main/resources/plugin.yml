@@ -9,3 +9,6 @@ commands:
     description: Send moderator request
   unlocktutorialchat:
     description: Unlocks tutorial chat
+  ltr:
+    description: Fake local chat
+    permission: cvchat.fakelocal

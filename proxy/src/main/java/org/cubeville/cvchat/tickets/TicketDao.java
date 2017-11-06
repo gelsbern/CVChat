@@ -44,7 +44,7 @@ public class TicketDao extends DaoBase
                                            moderatorId == null ? null : UUID.fromString(moderatorId),
                                            rs.getString("moderator_name"),
                                            rs.getString("moderator_text"),
-                                           rs.getLong("moderator_timestamp"));
+                                           rs.getLong("moderator_timestamp") * 1000);
                 ret.add(ticket);
             }
             statement.close();
@@ -100,6 +100,7 @@ public class TicketDao extends DaoBase
         }
         catch (SQLException e) {
             System.out.println("Updating ticket failed.");
+            e.printStackTrace();
             throw new RuntimeException("Updating the ticket failed.");
         }
     }

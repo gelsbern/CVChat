@@ -54,8 +54,8 @@ public abstract class CommandBase extends Command
     public boolean verifyOutranks(CommandSender sender, ProxiedPlayer player) {
         return verifyOutranks(sender, player.getUniqueId());
     }
-    
-    public boolean verifyOnline(ProxiedPlayer sender, String playerName) {
+
+    public boolean verifyOnline(CommandSender sender, String playerName) {
         if(ProxyServer.getInstance().getPlayer(playerName) == null) {
             sender.sendMessage("§cPlayer not found!");
             return false;
@@ -105,6 +105,10 @@ public abstract class CommandBase extends Command
         }
     }
 
+    public void sendMessage(ProxiedPlayer player, String message) {
+        player.sendMessage(message);
+    }
+    
     public boolean verify(ProxiedPlayer sender, boolean check, String message) {
         if(!check) {
             sender.sendMessage(message);
@@ -143,5 +147,10 @@ public abstract class CommandBase extends Command
     public PlayerDataManager getPDM() {
         return PlayerDataManager.getInstance();
     }
-    
+
+    public boolean isPlayerEqual(CommandSender sender, ProxiedPlayer player) {
+        if(!(sender instanceof ProxiedPlayer)) return false;
+        ProxiedPlayer senderPlayer = (ProxiedPlayer) sender;
+        return senderPlayer.getUniqueId().equals(player.getUniqueId());
+    }
 }

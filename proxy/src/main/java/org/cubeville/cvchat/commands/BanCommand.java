@@ -34,14 +34,18 @@ public class BanCommand extends CommandBase
         if(!verifyOutranks(sender, bannedPlayerId)) return;
         
         String bannedPlayerName = getPDM().getPlayerName(bannedPlayerId);
-        SanctionManager.getInstance().banPlayer(sender, bannedPlayerId, banReason, 0, silent);
+        if(SanctionManager.getInstance().banPlayer(sender, bannedPlayerId, banReason, 0, silent)) {
+            if(!silent) {
+                sendMessage(getAllPlayers(), "§e" + bannedPlayerName + "§6 was banned by §e" + senderName + "§6. Reason: §e" + banReason);
+            }
+            else {
+                sendMessage(getAllPlayersWithPermission("cvchat.ban.notifysilent"), "§c[Silent] §e" + bannedPlayerName + "§6 was banned by §e" + senderName + "§6. Reason: §e" + banReason);
+            }
 
-        if(!silent) {
-            sendMessage(getAllPlayers(), "§e" + bannedPlayerName + "§6 was banned by §e" + senderName + "§6. Reason: §e" + banReason);
+            sender.sendMessage("§dPlease don't forget to make a /note!");
         }
         else {
-            sendMessage(getAllPlayersWithPermission("cvchat.ban.notifysilent"), "§c[Silent] §e" + bannedPlayerName + "§6 was banned by §e" + senderName + "§6. Reason: §e" + banReason);
+            sender.sendMessage("§cPlayer is already banned permanently.");
         }
-
     }
 }

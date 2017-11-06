@@ -2,6 +2,7 @@ package org.cubeville.cvchat.commands;
 
 import net.md_5.bungee.api.CommandSender;
 
+import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.tickets.TicketManager;
 
 public class DoneCommand extends CommandBase
@@ -21,6 +22,9 @@ public class DoneCommand extends CommandBase
                 for(int i = 1; i < args.length; i++) {
                     if(i > 1) text += " ";
                     text += args[i];
+                }
+                if(commandSender.hasPermission("cvchat.ticket.color")) {
+                    text = Util.translateAlternateColorCodes(text);
                 }
                 ticketManager.closeTicket(commandSender, id, text);
             }

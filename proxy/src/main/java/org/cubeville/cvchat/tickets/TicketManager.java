@@ -109,6 +109,16 @@ public class TicketManager implements IPCInterface
         c.setTimeInMillis(timestamp);
         return df.format(c.getTime());
     }
+
+    public int getNumberOfOpenTickets() {
+        int cnt = 0;
+        for(Ticket ticket: tickets) {
+            if(ticket.isClosed() == false && ticket.isHeld() == false) {
+                cnt++;
+            }
+        }
+        return cnt;
+    }
     
     public void checkTickets(CommandSender sender, boolean held, boolean closed, int page) {
         // TODO: Need to async this?
@@ -238,6 +248,7 @@ public class TicketManager implements IPCInterface
         ticket.setModeratorTimestamp(System.currentTimeMillis());
 
         sendNotification("§6Request #" + ticket.getId() + " has been completed.");
+        sendNotification("§6Mod comment - §7" + text);
         sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 has completed your request.");
         if(sendPlayerNotification(ticket.getPlayer(), "§6Mod comment - §7" + text)) {
             ticket.setPlayerNotified(true);
@@ -263,6 +274,7 @@ public class TicketManager implements IPCInterface
 
         ticket.setClosed(false);
         ticket.setClaimed(false);
+        ticket.setHeld(false);
         ticket.setModerator(player.getUniqueId());
         ticket.setModeratorName(player.getName());
         ticket.setModeratorTimestamp(System.currentTimeMillis());

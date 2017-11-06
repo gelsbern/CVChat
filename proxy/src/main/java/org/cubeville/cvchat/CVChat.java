@@ -25,6 +25,7 @@ import org.cubeville.cvchat.commands.ChannelCommand;
 import org.cubeville.cvchat.commands.ChatCommand;
 import org.cubeville.cvchat.commands.CheckbanCommand;
 import org.cubeville.cvchat.commands.CheckCommand;
+import org.cubeville.cvchat.commands.ClearchatCommand;
 import org.cubeville.cvchat.commands.DibsCommand;
 import org.cubeville.cvchat.commands.DoneCommand;
 import org.cubeville.cvchat.commands.FinishCommand;
@@ -32,6 +33,7 @@ import org.cubeville.cvchat.commands.FjCommand;
 import org.cubeville.cvchat.commands.ForwardCommand;
 import org.cubeville.cvchat.commands.FqCommand;
 import org.cubeville.cvchat.commands.GroupCommand;
+import org.cubeville.cvchat.commands.GTrCommand;
 import org.cubeville.cvchat.commands.HoldCommand;
 import org.cubeville.cvchat.commands.KickCommand;
 import org.cubeville.cvchat.commands.LocalCommand;
@@ -41,15 +43,17 @@ import org.cubeville.cvchat.commands.MuteCommand;
 import org.cubeville.cvchat.commands.NoteCommand;
 import org.cubeville.cvchat.commands.PrefixCommand;
 import org.cubeville.cvchat.commands.ProfileCommand;
+import org.cubeville.cvchat.commands.PTrCommand;
 import org.cubeville.cvchat.commands.RCommand;
 import org.cubeville.cvchat.commands.ReopenCommand;
 import org.cubeville.cvchat.commands.RlCommand;
+import org.cubeville.cvchat.commands.SuCommand;
 import org.cubeville.cvchat.commands.TempbanCommand;
 import org.cubeville.cvchat.commands.TestCommand;
 import org.cubeville.cvchat.commands.TpidCommand;
 import org.cubeville.cvchat.commands.TrCommand;
 import org.cubeville.cvchat.commands.UnbanCommand;
-import org.cubeville.cvchat.commands.UnclaimCommand;
+import org.cubeville.cvchat.commands.BacksiesCommand;
 import org.cubeville.cvchat.commands.UnmuteCommand;
 import org.cubeville.cvchat.commands.WhoCommand;
 
@@ -77,15 +81,30 @@ public class CVChat extends Plugin {
 
     private Logger logger;
 
+    private long startupTime;
+    
     private static CVChat instance;
     public static CVChat getInstance() {
         return instance;
+    }
+
+    public long getUptime() {
+        long uptime = System.currentTimeMillis() - startupTime;
+        uptime /= 1000;
+        return uptime;
     }
     
     @Override
     public void onEnable() {
         instance = this;
 
+        startupTime = System.currentTimeMillis();
+        ProxyServer.getInstance().getScheduler().schedule(this, new Runnable() {
+                public void run() {
+                    System.out.println("Uptime: " + (getUptime() / 60) + " minutes");
+                }
+            }, 300, 300, TimeUnit.SECONDS);
+        
         logger = new Logger(new File(getDataFolder(), "logs"));
         ProxyServer.getInstance().getScheduler().schedule(this, logger, 2000, 2000, TimeUnit.MILLISECONDS);
 
@@ -118,7 +137,7 @@ public class CVChat extends Plugin {
                     pm.registerCommand(this, new HoldCommand(ticketManager));
                     pm.registerCommand(this, new ReopenCommand(ticketManager));
                     pm.registerCommand(this, new TpidCommand(ticketManager));
-                    pm.registerCommand(this, new UnclaimCommand(ticketManager));
+                    pm.registerCommand(this, new BacksiesCommand(ticketManager));
                 }
                 else {
                     System.out.println("No ticket dao configuration found. Ticket system not available.");
@@ -188,6 +207,10 @@ public class CVChat extends Plugin {
                 pm.registerCommand(this, new PrefixCommand());
                 pm.registerCommand(this, new LocalCommand(local));
                 pm.registerCommand(this, new TrCommand());
+                pm.registerCommand(this, new PTrCommand());
+                pm.registerCommand(this, new GTrCommand());
+                pm.registerCommand(this, new SuCommand());
+                pm.registerCommand(this, new ClearchatCommand());
             }
 
             { // Install playerdata system

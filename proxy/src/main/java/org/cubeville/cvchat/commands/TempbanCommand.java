@@ -16,6 +16,8 @@ public class TempbanCommand extends CommandBase
     public void execute(CommandSender sender, String[] args) {
         String senderName = getPlayerName(sender);
 
+        if(!verifyNotLessArguments(sender, args, 1)) return;
+        
         int offset = 0;
         boolean silent = false;
         if(args[0].equals("-s")) {
@@ -76,5 +78,7 @@ public class TempbanCommand extends CommandBase
         else {
             sendMessage(getAllPlayersWithPermission("cvchat.ban.notifysilent"), "§c[Silent] §e" + bannedPlayerName + "§6 was temporarily banned by §e" + senderName + "§6. Reason: §e" + banReason);
         }
+
+        sender.sendMessage("§dPlease don't forget to make a /note!");
     }
 }

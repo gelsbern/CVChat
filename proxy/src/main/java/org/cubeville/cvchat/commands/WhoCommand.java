@@ -13,16 +13,13 @@ import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.sanctions.SanctionManager;
 import org.cubeville.cvchat.ranks.RankManager;
 
-public class WhoCommand extends Command
+public class WhoCommand extends CommandBase
 {
     public WhoCommand() {
         super("who", null, "list", "playerlist", "online", "players");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
-        if(!(commandSender instanceof ProxiedPlayer)) return;
-        ProxiedPlayer sender = (ProxiedPlayer) commandSender;
-
+    public void execute(CommandSender sender, String[] args) {
         if(args.length > 1) {
             sender.sendMessage("§cToo many arguments.");
             sender.sendMessage("§c/who [filter]");
@@ -34,7 +31,12 @@ public class WhoCommand extends Command
         for(ProxiedPlayer player: ProxyServer.getInstance().getPlayers()) {
             if(args.length == 0 || player.getDisplayName().toUpperCase().indexOf(args[0].toUpperCase()) >= 0) {
                 boolean vis = !Util.playerIsHidden(player);
-                boolean hvis = (player.getUniqueId().equals(sender.getUniqueId())) || (sender.hasPermission("cvchat.showvanished"));
+                boolean hvis = true;
+                if(sender instanceof ProxiedPlayer) {
+                    ProxiedPlayer senderPlayer = (ProxiedPlayer) sender;
+                    boolean outranks = getPDM().outranksOrEqual(senderPlayer.getUniqueId(), player.getUniqueId());
+                    hvis = isPlayerEqual(senderPlayer, player) || outranks;
+                }
                 if(vis || hvis) {
                     if(list.length() > 0) list += "§r, ";
                     list += "§" + RankManager.getInstance().getColor(player);

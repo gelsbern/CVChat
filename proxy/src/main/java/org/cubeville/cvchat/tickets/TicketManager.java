@@ -4,9 +4,12 @@ import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -25,6 +28,8 @@ public class TicketManager implements IPCInterface
     
     private List<Ticket> tickets;
     TicketDao dao;
+
+    private Set<String> openTicketPlayerList;
     
     public TicketManager(CVChat plugin, CVIPC ipc, TicketDao dao) {
         this.ipc = ipc;
@@ -32,6 +37,7 @@ public class TicketManager implements IPCInterface
         ipc.registerInterface("modreq", this);
         this.dao = dao;
         tickets = dao.loadTickets();
+        updateOpenTicketPlayerList();
     }
     
     public void process(String serverName, String channel, String message) {
@@ -57,6 +63,7 @@ public class TicketManager implements IPCInterface
             dao.createTicket(ticket);
             player.sendMessage("§6Thank you. Your message has been sent. A moderator should be with you shortly.");
             sendNotification("§aNew mod request filed; use /check for more.");
+            updateOpenTicketPlayerList();
         }
         catch(RuntimeException e) {
             player.sendMessage("§cTicket creation failed. Please contact an administrator.");
@@ -67,11 +74,19 @@ public class TicketManager implements IPCInterface
         UUID playerId = player.getUniqueId();
         for(Ticket ticket: tickets) {
             if(ticket.isClosed() == true && ticket.playerNotified() == false && ticket.getPlayer().equals(playerId)) {
-                sendPlayerNotification(playerId, "§6" + ticket.getModeratorName() + "§6 has completed your request:");
-                sendPlayerNotification(playerId, "§6Request - §7" + ticket.getText());
-                sendPlayerNotification(playerId, "§6Mod comment - §7" + ticket.getModeratorText());
                 ticket.setPlayerNotified(true);
                 updateTicketAsync(ticket);
+                final String moderatorName = ticket.getModeratorName();
+                final String ticketText = ticket.getText();
+                final String moderatorText = ticket.getModeratorText();
+                final long ticketId = ticket.getId();
+                ProxyServer.getInstance().getScheduler().schedule(plugin, new Runnable() {
+                        public void run() { 
+                            sendPlayerNotification(playerId, "§6" + moderatorName + "§6 has completed your request while you were offline:");
+                            sendPlayerNotification(playerId, "§6Request - §7" + ticketText);
+                            sendPlayerNotification(playerId, "§6Mod comment - §7" + moderatorText);
+                        }
+                    }, 5, TimeUnit.SECONDS );
             }
         }
     }
@@ -254,6 +269,7 @@ public class TicketManager implements IPCInterface
             ticket.setPlayerNotified(true);
         }
 
+        updateOpenTicketPlayerList();        
         updateTicketAsync(ticket);
     }
 
@@ -279,6 +295,8 @@ public class TicketManager implements IPCInterface
         ticket.setModeratorName(player.getName());
         ticket.setModeratorTimestamp(System.currentTimeMillis());
         ticket.setPlayerNotified(false);
+
+        updateOpenTicketPlayerList();
         updateTicketAsync(ticket);
 
         sendNotification("§6Request #" + ticket.getId() + " has been reopened.");
@@ -339,6 +357,7 @@ public class TicketManager implements IPCInterface
         ticket.setModerator(player.getUniqueId());
         ticket.setModeratorName(player.getName());
         ticket.setModeratorTimestamp(System.currentTimeMillis());
+        updateOpenTicketPlayerList();        
         updateTicketAsync(ticket);
 
         sendNotification("§6Request #" + ticket.getId() + " is now on hold.");
@@ -371,5 +390,18 @@ public class TicketManager implements IPCInterface
                     dao.updateTicket(ticket);
                 }
             });
+    }
+
+    private void updateOpenTicketPlayerList() {
+        openTicketPlayerList = new HashSet<>();
+        for(Ticket ticket: tickets) {
+            if(ticket.isClosed() == false && ticket.isHeld() == false) {
+                openTicketPlayerList.add(ticket.getPlayerName());
+            }
+        }
+    }
+
+    public Set<String> getOpenTicketPlayerList() {
+        return openTicketPlayerList;
     }
 }

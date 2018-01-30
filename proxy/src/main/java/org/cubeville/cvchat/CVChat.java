@@ -165,7 +165,7 @@ public class CVChat extends Plugin {
             Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
             Configuration textCommandConfig = (Configuration)config.get("textcommands");
             TextCommandManager textCommandManager = new TextCommandManager(textCommandConfig);
-            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ipc);
+            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ticketManager, ipc);
             pm.registerListener(this, chatListener);
             
             pm.registerListener(this, new LoginListener(channelManager, ticketManager));

@@ -20,6 +20,7 @@ import org.cubeville.cvchat.channels.Channel;
 import org.cubeville.cvchat.log.Logger;
 import org.cubeville.cvchat.playerdata.PlayerDataManager;
 import org.cubeville.cvchat.textcommands.TextCommandManager;
+import org.cubeville.cvchat.tickets.TicketManager;
 
 public class ChatListener implements Listener, IPCInterface {
 
@@ -30,13 +31,15 @@ public class ChatListener implements Listener, IPCInterface {
     private Set<UUID> tutorialChatUnlocked;
     private Map<String, String> aliases;
 
+    private TicketManager ticketManager;
     private CVIPC cvipc;
     
-    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, CVIPC ipc) {
+    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
         this.commandWhitelistTutorial = commandWhitelistTutorial;
         this.textCommandManager = textCommandManager;
+        this.ticketManager = ticketManager;
         tutorialChatUnlocked = new HashSet<>();
         this.cvipc = ipc;
         ipc.registerInterface("unlocktutorialchat", this);
@@ -146,40 +149,38 @@ public class ChatListener implements Listener, IPCInterface {
 
     @EventHandler
     public void onTabCompleteEvent(final TabCompleteEvent event) {
-        for(String s: event.getSuggestions()) {
-            System.out.println("- " + s);
+        if(!(event.getSender() instanceof ProxiedPlayer)) {
+            event.setCancelled(true);
+            return;
         }
-        int lastSpace = event.getCursor().lastIndexOf(' ');
+        
+        ProxiedPlayer player = (ProxiedPlayer) event.getSender();
+
+        String c = event.getCursor();
+        while(c.startsWith(" ")) c = c.substring(1);
+        
+        int lastSpace = c.lastIndexOf(' ');
         if(lastSpace != -1) {
-            String c = event.getCursor();
             String lastWord = c.substring(lastSpace + 1);
-            if(c.startsWith("/msg ") || // TODO: welp...
-               c.startsWith("/tp ") || // TODO: Check permission of commands for player or, at least the whitelist
-               c.startsWith("/bring ") ||
-               c.startsWith("/profile ") ||
-               c.startsWith("/ban ") ||
-               c.startsWith("/tempban ") ||
-               c.startsWith("/kick ") ||
-               c.startsWith("/mute ") ||
-               c.startsWith("/unmute ") ||
-               c.startsWith("/oi ") ||
-               c.startsWith("/oe ") ||
-               c.startsWith("/note ") ||
-               c.startsWith("/doc ") ||
-               c.startsWith("/money ") ||
-               c.startsWith("/su ") ) {
-                for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
-                    if(!Util.playerIsHidden(p)) {
-                        String pname = Util.removeColorCodes(p.getDisplayName());
-                        if(pname.toLowerCase().startsWith(lastWord.toLowerCase())) {
-                            event.getSuggestions().add(pname);
-                        }
-                    }
+            Set<String> players;
+            if(player.hasPermission("cvchat.tabcompletion.modreq")) {
+                players = ticketManager.getOpenTicketPlayerList();
+            }
+            else {
+                players = new HashSet<>();
+            }
+            for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
+                if(!Util.playerIsHidden(p)) {
+                    players.add(Util.removeColorCodes(p.getDisplayName()));
+                }
+            }
+            for(String pname: players) {
+                if(pname.toLowerCase().startsWith(lastWord.toLowerCase())) {
+                    event.getSuggestions().add(pname);
                 }
             }
         }
         else {
-            String c = event.getCursor();
             if(c.startsWith("/")) {
                 c = c.substring(1);
                 for(String cmd: commandWhitelist) {

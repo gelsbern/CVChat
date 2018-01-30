@@ -36,13 +36,16 @@ public class LoginListener implements Listener
     @EventHandler
     public void onPreLogin(final PreLoginEvent event) {
         String playerName = event.getConnection().getName();
+        if(!(playerName.equals("FrediW") || playerName.equals("deanwin"))) {
+            event.setCancelReason("§cSorry, the server is under maintenance.\n§cPlease come back a little later!");
+        }
         int protocolVersion = event.getConnection().getVersion();
-        if(protocolVersion != 316) {
+        if(protocolVersion != 340) {
             event.setCancelled(true);
             String currentVersion = "Undeterminable";
-            if(protocolVersion >= 335) currentVersion = "1.12 or newer";
-            if(protocolVersion <= 210) currentVersion = "1.10 or older";
-            event.setCancelReason("§cPlease use §aMinecraft v1.11.2 §cfor Cubeville.\nYou're currently using: §e" + currentVersion);
+            if(protocolVersion >= 335) currentVersion = "1.13 or newer";
+            if(protocolVersion <= 210) currentVersion = "1.11 or older";
+            event.setCancelReason("§cPlease use §aMinecraft v1.12.2 §cfor Cubeville.\nYou're currently using: §e" + currentVersion);
         }
         Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
         for(ProxiedPlayer p: players) {

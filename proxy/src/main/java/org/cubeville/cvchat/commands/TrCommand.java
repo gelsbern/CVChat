@@ -10,7 +10,7 @@ public class TrCommand extends CommandBase
         super("tr", "cvchat.tr");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         String message = joinStrings(args, 0);
         message = Util.translateAlternateColorCodes(message);
         sendMessage(getAllPlayers(), message);

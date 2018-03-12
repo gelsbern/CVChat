@@ -13,7 +13,7 @@ public class TempbanCommand extends CommandBase
         setUsage("/tempban <player> <amount> <unit> <reason>");
     }
 
-    public void execute(CommandSender sender, String[] args) {
+    public void executeC(CommandSender sender, String[] args) {
         String senderName = getPlayerName(sender);
 
         if(!verifyNotLessArguments(sender, args, 1)) return;

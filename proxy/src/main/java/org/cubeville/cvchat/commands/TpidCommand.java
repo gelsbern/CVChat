@@ -13,7 +13,7 @@ public class TpidCommand extends CommandBase
         this.ticketManager = ticketManager;
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(args.length != 1) {
             commandSender.sendMessage("/tpid <modreq-id>");
             return;

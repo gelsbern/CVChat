@@ -13,7 +13,7 @@ public class HoldCommand extends CommandBase
         this.ticketManager = ticketManager;
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(args.length != 1) {
             commandSender.sendMessage("§cWrong number of arguments.");
             commandSender.sendMessage("§c/hold <modreq-id>");

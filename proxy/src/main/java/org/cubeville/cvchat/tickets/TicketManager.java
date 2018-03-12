@@ -60,9 +60,9 @@ public class TicketManager implements IPCInterface
                                        loctk.nextToken(), Integer.valueOf(loctk.nextToken()), Integer.valueOf(loctk.nextToken()), Integer.valueOf(loctk.nextToken()),
                                        System.currentTimeMillis());
             tickets.add(ticket);
-            dao.createTicket(ticket);
+            int ticketId = dao.createTicket(ticket);
             player.sendMessage("§6Thank you. Your message has been sent. A moderator should be with you shortly.");
-            sendNotification("§aNew mod request filed; use /check for more.");
+            sendNotification("§6New mod request #" + ticketId + " filed; use /check for more.");
             updateOpenTicketPlayerList();
         }
         catch(RuntimeException e) {
@@ -402,6 +402,6 @@ public class TicketManager implements IPCInterface
     }
 
     public Set<String> getOpenTicketPlayerList() {
-        return openTicketPlayerList;
+        return new HashSet<String>(openTicketPlayerList);
     }
 }

@@ -21,7 +21,7 @@ public class ModlistCommand extends CommandBase
         super("modlist", null);
     }
 
-    public void execute(CommandSender sender, String[] args) {
+    public void executeC(CommandSender sender, String[] args) {
         if(args.length > 1) {
             sender.sendMessage("§cToo many arguments.");
             sender.sendMessage("/modlist [filter]");

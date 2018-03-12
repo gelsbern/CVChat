@@ -24,7 +24,7 @@ public class ProfileCommand extends CommandBase
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
-    public void execute(CommandSender sender, String[] args) {                                
+    public void executeC(CommandSender sender, String[] args) {                                
         if(!verifyNotLessArguments(sender, args, 1)) return;
         if(!verifyNotMoreArguments(sender, args, 1)) return;
 

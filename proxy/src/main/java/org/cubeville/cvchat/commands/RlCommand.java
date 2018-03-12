@@ -18,7 +18,7 @@ public class RlCommand extends CommandBase
         setUsage("§c/rl <message...>");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
 
@@ -29,7 +29,7 @@ public class RlCommand extends CommandBase
 
         ProxiedPlayer recipient = ProxyServer.getInstance().getPlayer(recipientId);
         boolean fakeNotFound = false;
-        if(recipient == null || (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false)) {
+        if(recipient == null || (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false && MsgCommand.disabledRefusal(recipient.getUniqueId()) == false)) {
             sender.sendMessage("§cPlayer left.");
             if(recipient == null) return;
             fakeNotFound = true;

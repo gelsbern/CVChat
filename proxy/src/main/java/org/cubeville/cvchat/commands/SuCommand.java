@@ -11,7 +11,7 @@ public class SuCommand extends CommandBase
         setUsage("§c/su <player> <command> <args>...");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(!verifyNotLessArguments(commandSender, args, 2)) return;
 
         ProxyServer server = ProxyServer.getInstance();

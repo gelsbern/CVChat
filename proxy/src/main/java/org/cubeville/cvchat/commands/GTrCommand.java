@@ -10,7 +10,7 @@ public class GTrCommand extends CommandBase
         super("gtr", "cvchat.gtr");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(args.length < 2) {
             commandSender.sendMessage("§c/gtr <permission> <message>");
             return;

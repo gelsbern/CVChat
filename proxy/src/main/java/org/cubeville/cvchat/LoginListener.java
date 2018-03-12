@@ -36,16 +36,14 @@ public class LoginListener implements Listener
     @EventHandler
     public void onPreLogin(final PreLoginEvent event) {
         String playerName = event.getConnection().getName();
-        if(!(playerName.equals("FrediW") || playerName.equals("deanwin"))) {
-            event.setCancelReason("§cSorry, the server is under maintenance.\n§cPlease come back a little later!");
-        }
         int protocolVersion = event.getConnection().getVersion();
         if(protocolVersion != 340) {
             event.setCancelled(true);
             String currentVersion = "Undeterminable";
-            if(protocolVersion >= 335) currentVersion = "1.13 or newer";
-            if(protocolVersion <= 210) currentVersion = "1.11 or older";
+            if(protocolVersion > 340) currentVersion = "1.13 or newer";
+            if(protocolVersion < 340) currentVersion = "1.12.1/1.11 or older";
             event.setCancelReason("§cPlease use §aMinecraft v1.12.2 §cfor Cubeville.\nYou're currently using: §e" + currentVersion);
+            return;
         }
         Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
         for(ProxiedPlayer p: players) {
@@ -82,9 +80,12 @@ public class LoginListener implements Listener
         
         PlayerDataManager pdm = PlayerDataManager.getInstance();
         UUID playerId = player.getUniqueId();
+
+        boolean newPlayer = false;
         
         if(!player.hasPermission("cvchat.silent.join")) {
             if(!pdm.isPlayerKnown(playerId)) {
+                newPlayer = true;
                 sendWelcomeMessage(player.getName());
                 pdm.addPlayer(playerId, player.getName(), getStrippedIpAddress(player));
                 sendMessage(player.getDisplayName(), "joined");
@@ -123,7 +124,7 @@ public class LoginListener implements Listener
             }
         }
 
-        System.out.println("Player " + player.getName() + " logged in.");
+        System.out.println("Player " + player.getName() + " logged in" + (newPlayer ? " for the first time." : "."));
     }
 
     private String getStrippedIpAddress(ProxiedPlayer player) {

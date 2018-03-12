@@ -1,7 +1,9 @@
 package org.cubeville.cvchat.commands;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import net.md_5.bungee.api.CommandSender;
@@ -17,25 +19,52 @@ public class MsgCommand extends CommandBase
 {
     private static Map<UUID, UUID> lastMessageReceived;
     private static Map<UUID, UUID> lastMessageSent;
+    private static Set<UUID> disableRefusal;
     
     public MsgCommand() {
+
         super("msg");
         setUsage("§c/msg <target> <message...>");
         lastMessageReceived = new HashMap<>();
         lastMessageSent = new HashMap<>();
+        disableRefusal = new HashSet<>();
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public static boolean disabledRefusal(UUID player) {
+        return disableRefusal.contains(player);
+    }
+    
+    public void executeC(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
 
+        if(sender.hasPermission("cvchat.refusepm")) {
+            if(args.length == 0) {
+                sender.sendMessage("§aYou " + (disabledRefusal(sender.getUniqueId()) ? "can" : "can't") + " receive private messages when you're vanished.");
+                return;
+            }
+            else if(args.length == 1) {
+                if(args[0].equals("on")) {
+                    disableRefusal.add(sender.getUniqueId());
+                    sender.sendMessage("§aYou will receive private messages now.");
+                    return;
+                }
+                else if(args[0].equals("off")) {
+                    disableRefusal.remove(sender.getUniqueId());
+                    sender.sendMessage("§aYou will not receive private messages now.");
+                    return;
+                }
+            }
+        }
+        
         if(!verifyNotLessArguments(sender, args, 2)) return;
 
         boolean fakeNotFound = false;
             
         ProxiedPlayer recipient = getPlayer(args[0]);
         
-        if(recipient == null || (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false)) {
+        if(recipient == null ||
+           (Util.playerIsHidden(recipient) == true && recipient.hasPermission("cvchat.refusepm") == true && sender.hasPermission("cvchat.showvanished") == false && disabledRefusal(recipient.getUniqueId()) == false)) {
             sender.sendMessage("§cPlayer not found!");
             if(recipient == null) return;
             fakeNotFound = true;

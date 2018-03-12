@@ -14,7 +14,7 @@ public class BacksiesCommand extends CommandBase
         // TODO: What about some permissions?
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(args.length == 1) {
             try {
                 int id = Integer.valueOf(args[0]);

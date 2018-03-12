@@ -12,7 +12,7 @@ public class PTrCommand extends CommandBase
         super("ptr", "cvchat.ptr");
     }
 
-    public void execute(CommandSender commandSender, String[] args) {
+    public void executeC(CommandSender commandSender, String[] args) {
         if(args.length < 2) {
             commandSender.sendMessage("§c/ptr <player> <message>");
             return;

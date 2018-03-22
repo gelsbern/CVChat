@@ -363,6 +363,37 @@ public class TicketManager implements IPCInterface
         sendNotification("§6Request #" + ticket.getId() + " is now on hold.");
     }
     
+    public void unholdTicket(CommandSender sender, int ticketId) {
+        if(!(sender instanceof ProxiedPlayer)) return;
+        ProxiedPlayer player = (ProxiedPlayer) sender;
+        
+        Ticket ticket = getTicketById(ticketId);
+        if(ticket == null) {
+            player.sendMessage("§cInvalid ticket id.");
+            return;
+        }
+        
+        if(ticket.isClosed()) {
+          player.sendMessage("§cTicket is closed, cannot hold");
+          return;
+        }
+        
+        if(!(ticket.isHeld())) {
+          player.sendMessage("§cTicket is not held.");
+          return;
+        }
+        
+        ticket.setHeld(false);
+        ticket.setClaimed(false);
+        ticket.setModerator(player.getUniqueId());
+        ticket.setModeratorName(player.getName());
+        ticket.setModeratorTimestamp(System.currentTimeMillis());
+        updateOpenTicketPlayerList();
+        updateTicketAsync(ticket);
+        
+        sendNotification("§6Request *" + ticket.getId() + " removed from the hold list.");
+    }
+    
     public void tpid(CommandSender sender, int ticketId) {
         if(!(sender instanceof ProxiedPlayer)) return;
         ProxiedPlayer player = (ProxiedPlayer) sender;

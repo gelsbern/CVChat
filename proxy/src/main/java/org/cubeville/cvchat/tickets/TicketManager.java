@@ -163,10 +163,10 @@ public class TicketManager implements IPCInterface
             }
         }
         if(cnt == -1) {
-            String type = "open";
-            if(held) type = "held";
-            if(closed) type = "closed";
-            sender.sendMessage("No " + type + " open modreqs.");
+            String msg = "No open open modreqs. Also there are no closed open and no open closed modreqs.";
+            if(held) msg = "No held modreqs.";
+            if(closed) msg = "No closed modreqs.";
+            sender.sendMessage(msg);
             return;
         }
         int from = page * 5 - 4;

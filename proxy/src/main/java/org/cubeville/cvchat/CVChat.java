@@ -56,6 +56,7 @@ import org.cubeville.cvchat.commands.UnbanCommand;
 import org.cubeville.cvchat.commands.BacksiesCommand;
 import org.cubeville.cvchat.commands.UnmuteCommand;
 import org.cubeville.cvchat.commands.WhoCommand;
+import org.cubeville.cvchat.commands.UnholdCommand;
 
 import org.cubeville.cvchat.log.Logger;
 
@@ -138,6 +139,7 @@ public class CVChat extends Plugin {
                     pm.registerCommand(this, new ReopenCommand(ticketManager));
                     pm.registerCommand(this, new TpidCommand(ticketManager));
                     pm.registerCommand(this, new BacksiesCommand(ticketManager));
+                    pm.registerCommand(this, new UnholdCommand(ticketManager));
                 }
                 else {
                     System.out.println("No ticket dao configuration found. Ticket system not available.");

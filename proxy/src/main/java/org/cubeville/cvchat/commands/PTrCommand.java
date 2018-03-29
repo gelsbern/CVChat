@@ -14,19 +14,27 @@ public class PTrCommand extends CommandBase
 
     public void executeC(CommandSender commandSender, String[] args) {
         if(args.length < 2) {
-            commandSender.sendMessage("§c/ptr <player> <message>");
+            commandSender.sendMessage("§c/ptr <player>[,player...] <message>");
             return;
         }
         
-        String playerName = args[0];
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
-        if(player == null) {
-            commandSender.sendMessage("§cPlayer not found!");
-            return;
+        String originalMessage = joinStrings(args, 1);
+        String message = Util.translateAlternateColorCodes(originalMessage);
+
+        String[] playerNames = args[0].split(",");
+        String notFound = "";
+        for(int i = 0; i < playerNames.length; i++) {
+            ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerNames[i]);
+            if(player == null) {
+                if(notFound.length() > 0) notFound += ", ";
+                notFound += playerNames[i];
+            }
+            sendMessage(player, message);
         }
-        
-        String message = joinStrings(args, 1);
-        message = Util.translateAlternateColorCodes(message);
-        sendMessage(player, message);
+        commandSender.sendMessage("ptr sent: " + message);
+
+        if(notFound.length() > 0) {
+            commandSender.sendMessage("§cPlayers not found: " + notFound);
+        }
     }
 }

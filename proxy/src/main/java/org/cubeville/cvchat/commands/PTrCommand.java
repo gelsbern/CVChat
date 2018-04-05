@@ -29,9 +29,11 @@ public class PTrCommand extends CommandBase
                 if(notFound.length() > 0) notFound += ", ";
                 notFound += playerNames[i];
             }
-            sendMessage(player, message);
+            else {
+                sendMessage(player, message);
+            }
         }
-        commandSender.sendMessage("ptr sent: " + message);
+        commandSender.sendMessage("§8ptr: §r" + message);
 
         if(notFound.length() > 0) {
             commandSender.sendMessage("§cPlayers not found: " + notFound);

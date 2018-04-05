@@ -90,7 +90,7 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
             Player player = (Player) sender;
             
             if(args.length == 0) {
-                sender.sendMessage("/modreq <message>");
+                sender.sendMessage("§cEnter /modreq followed by a description what you need help with.");
                 return true;
             }
             

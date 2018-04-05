@@ -391,7 +391,7 @@ public class TicketManager implements IPCInterface
         updateOpenTicketPlayerList();
         updateTicketAsync(ticket);
         
-        sendNotification("§6Request *" + ticket.getId() + " removed from the hold list.");
+        sendNotification("§6Request #" + ticket.getId() + " removed from the hold list.");
     }
     
     public void tpid(CommandSender sender, int ticketId) {

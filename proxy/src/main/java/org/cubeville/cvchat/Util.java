@@ -97,6 +97,7 @@ public class Util
                 if(l == null) break;
                 ret.add(l);
             }
+            reader.close();
         }
         catch(IOException exceptin) {}
         finally {

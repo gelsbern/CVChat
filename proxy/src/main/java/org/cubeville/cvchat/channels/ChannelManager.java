@@ -84,11 +84,7 @@ public class ChannelManager implements IPCInterface
             }
         }
         else if(channel.equals("localmonitor")){
-            int idx = message.indexOf("|");
-            if(idx == -1) return;
-            String nearbyStatus = message.substring(0, idx);
-            String chatMessage = message.substring(idx + 1);
-            getLocalChannel().sendMonitorMessage(serverName, nearbyStatus, chatMessage);
+            getLocalChannel().sendMonitorMessage(serverName, message);
         }
     }
     

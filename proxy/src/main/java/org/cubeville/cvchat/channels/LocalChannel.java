@@ -47,11 +47,8 @@ public class LocalChannel extends Channel
         ChannelManager.getInstance().getIPC().sendMessage(serverName, msg);
     }
     
-    public void sendMonitorMessage(String server, String nearbyStatus, String formattedMessage) {
-        String nearbyIndicator = "";
-        if(nearbyStatus.equals("none")) { nearbyIndicator += "§e*§r"; }
-        else if(nearbyStatus.equals("other")) { nearbyIndicator += "§a*§r"; }
-        String finalMessage = "§7" + formattedMessage + " " + nearbyIndicator + " §7(Server: " + server + ")";
+    public void sendMonitorMessage(String server, String formattedMessage) {
+        String finalMessage = "§7" + formattedMessage + " §7(Server: " + server + ")";
         for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
             if(p.hasPermission("cvchat.monitor.local")) {
                 if(!p.getServer().getInfo().getName().equals(server)) {

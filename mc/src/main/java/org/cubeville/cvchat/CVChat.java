@@ -204,15 +204,15 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
                 if(recipientCount == 0) m += " §4*";
                 p.sendMessage(m);
             }
-            
+
+            if(recipientCount == 0) greyMessage += " §4*";
+            ipc.sendMessage("localmonitor|" + greyMessage);
             for(Player p: players) {
                 Location pl = p.getLocation();
                 boolean sameworld = pl.getWorld().getUID().equals(loc.getWorld().getUID());
                 if(sameworld == false || pl.distance(loc) >= 55) {
                     if(p.hasPermission("cvchat.monitor.local") && false == mutedIds.contains(p.getUniqueId())) {
-                        String m = greyMessage;
-                        if(recipientCount == 0) m += " §4*";
-                        p.sendMessage(m);
+                        p.sendMessage(greyMessage);
                     }
                 }
             }
@@ -230,13 +230,6 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
                 }
             }
             
-            String formattedMessage = removeColorCodes(message);
-            String nearbyStatus = " §e*§r";
-            if(recipientCount > 0) {
-                nearbyStatus = " §a*§r";
-            }
-            formattedMessage += nearbyStatus;
-            ipc.sendMessage("localmonitor|" + formattedMessage);
         }
     }
 

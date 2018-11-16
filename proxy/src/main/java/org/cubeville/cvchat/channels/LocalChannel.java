@@ -48,7 +48,7 @@ public class LocalChannel extends Channel
     }
     
     public void sendMonitorMessage(String server, String formattedMessage) {
-        String finalMessage = "§7" + formattedMessage + " §7(Server: " + server + ")";
+        String finalMessage = formattedMessage;
         for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
             if(p.hasPermission("cvchat.monitor.local")) {
                 if(!p.getServer().getInfo().getName().equals(server)) {

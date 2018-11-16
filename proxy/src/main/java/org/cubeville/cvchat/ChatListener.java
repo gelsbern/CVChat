@@ -56,7 +56,7 @@ public class ChatListener implements Listener, IPCInterface {
         aliases.put("/repair", "/rp");
         aliases.put("/hub", "/ptp hub");
         aliases.put("/tut", "/ptp tut");
-        aliases.put("/we cui" "/activatewecui");
+        aliases.put("/we cui", "/activatewecui");
     }
 
     public void unlockTutorialChat(UUID playerId) {

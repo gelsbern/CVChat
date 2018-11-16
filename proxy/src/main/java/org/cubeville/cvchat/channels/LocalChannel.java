@@ -27,14 +27,10 @@ public class LocalChannel extends Channel
         // 1) Send to all players who monitor local chat and are on different server
         String serverName = player.getServer().getInfo().getName();
         Collection<ProxiedPlayer> allPlayers = ProxyServer.getInstance().getPlayers();
-        String greyMessage = "§7" + Util.removeColorCodes(formattedMessage);
         String lm = "";
         for(ProxiedPlayer p: allPlayers) {
             if(p.hasPermission("cvchat.monitor.local")) {
-                if(!p.getServer().getInfo().getName().equals(serverName)) {
-                    if(!localMuted.contains(p.getUniqueId())) p.sendMessage(greyMessage + " §e*");
-                }
-                else {
+                if(p.getServer().getInfo().getName().equals(serverName)) {
                     if(localMuted.contains(p.getUniqueId())) {
                         if(lm.length() > 0) lm += ",";
                         lm += p.getUniqueId().toString();
@@ -42,7 +38,6 @@ public class LocalChannel extends Channel
                 }
             }
         }
-
         String idlist = player.getUniqueId().toString();
         if(lm.length() > 0) {
             idlist += ";" + lm;
@@ -50,6 +45,19 @@ public class LocalChannel extends Channel
         // 2) Send message to player's server for further handling
         String msg = "locchat|" + idlist + "|" + formattedMessage;
         ChannelManager.getInstance().getIPC().sendMessage(serverName, msg);
+    }
+    
+    public void sendMonitorMessage(String server, String formattedMessage) {
+        String finalMessage = "§7" + formattedMessage + " §7(Server: " + server + ")";
+        for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
+            if(p.hasPermission("cvchat.monitor.local")) {
+                if(!p.getServer().getInfo().getName().equals(server)) {
+                    if(!localMuted.contains(p.getUniqueId())) {
+                        p.sendMessage(finalMessage);
+                    }
+                }
+            }
+        }
     }
 
     public void setLocalMonitorMute(UUID playerId, boolean mute) {

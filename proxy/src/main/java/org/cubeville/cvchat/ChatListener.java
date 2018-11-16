@@ -56,6 +56,7 @@ public class ChatListener implements Listener, IPCInterface {
         aliases.put("/repair", "/rp");
         aliases.put("/hub", "/ptp hub");
         aliases.put("/tut", "/ptp tut");
+        aliases.put("/we cui" "/activatewecui");
     }
 
     public void unlockTutorialChat(UUID playerId) {
@@ -104,12 +105,6 @@ public class ChatListener implements Listener, IPCInterface {
 
             String cmd = event.getMessage();
 
-            if(cmd.toLowerCase().startsWith("/home")) {
-                cmd = "/home";
-                event.setMessage("/home");
-                return;
-            }
-            
             int idx = cmd.indexOf(" ");
             if(idx != -1) cmd = cmd.substring(0, idx);
             cmd = cmd.substring(1);
@@ -119,6 +114,7 @@ public class ChatListener implements Listener, IPCInterface {
                 event.setCancelled(true);
                 return;
             }
+
             if((finishedTutorial == true && commandWhitelist.contains(cmd)) || (commandWhitelistTutorial.contains(cmd))) {
                 return;
             }

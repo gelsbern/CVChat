@@ -2,7 +2,7 @@ name: CVChat
 main: org.cubeville.cvchat.CVChat
 authors: [FrediW]
 version: 0.1
-depend: [CVIPC]
+depend: [CVIPC,PremiumVanish]
 
 commands:
   modreq:

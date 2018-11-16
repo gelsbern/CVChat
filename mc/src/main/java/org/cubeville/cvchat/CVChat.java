@@ -229,6 +229,13 @@ public class CVChat extends JavaPlugin implements Listener, IPCInterface
                     fusRoDah(player, 3);
                 }
             }
+            
+            String nearbyStatus = "none";
+            if(recipientCount > 0) {
+                nearbyStatus = "other";
+            }
+            String formattedMessage = removeColorCodes(message);
+            ipc.sendMessage("localmonitor|" + nearbyStatus + "|" + formattedMessage);
         }
     }
 

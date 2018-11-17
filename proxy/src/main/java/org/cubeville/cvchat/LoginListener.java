@@ -155,6 +155,10 @@ public class LoginListener implements Listener
             }
         }
 
+        if(!RankManager.getInstance().isPrefixPermitted(player, pdm.getPrefix(playerId))) {
+            pdm.changePrefix(playerId, "");
+        }
+        
         System.out.println("Player " + player.getName() + " logged in" + (newPlayer ? " for the first time." : "."));
     }
 

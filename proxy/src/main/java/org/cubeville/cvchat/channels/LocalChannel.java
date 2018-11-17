@@ -16,7 +16,7 @@ public class LocalChannel extends Channel
     Set<UUID> localMuted;
 
     public LocalChannel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
-        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, filtered, commands);
+        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, filtered, commands, null);
         localMuted = new HashSet<>();
     }
 

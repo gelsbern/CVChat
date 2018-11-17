@@ -30,13 +30,14 @@ public class Channel
     private boolean listable; // Shows up in /ch list
     private boolean filtered;
     private Collection<String> commands;
+    private Collection<String> users;
     
     private Set<UUID> members;
 
     private Map<Integer, String> messageQueue;
     private Integer messageQueueId;
 
-    public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
+    public Channel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands, Collection<String> users) {
         this.name = name;
         this.viewPermission = viewPermission;
         this.sendPermission = sendPermission;
@@ -48,6 +49,7 @@ public class Channel
         this.listable = listable;
         this.filtered = filtered;
         this.commands = commands;
+        this.users = users;
 
         members = new HashSet<>();
 
@@ -58,11 +60,13 @@ public class Channel
 
     public void playerLogin(ProxiedPlayer player, String configuration) {
         if (viewPermission.equals("default") || player.hasPermission(viewPermission)) {
-            if(autojoin || (configuration == null && isDefault)) {
-                members.add(player.getUniqueId());
-            }
-            else if (configuration != null && Util.getBooleanProperty(configuration)) {
-                members.add(player.getUniqueId());
+            if(users == null || users.contains(player.getName())) {
+                if(autojoin || (configuration == null && isDefault)) {
+                    members.add(player.getUniqueId());
+                }
+                else if (configuration != null && Util.getBooleanProperty(configuration)) {
+                    members.add(player.getUniqueId());
+                }
             }
         }
     }
@@ -237,7 +241,7 @@ public class Channel
         if(members.contains(player.getUniqueId())) {
             player.sendMessage("§cYou are already in that channel.");
         }
-        else if(hasViewPermission(player)) {
+        else if(hasViewPermission(player) && (users == null || users.contains(player.getName()))) {
             members.add(player.getUniqueId());
             player.sendMessage("§aYou have joined channel '" + name + "'.");
             return true;

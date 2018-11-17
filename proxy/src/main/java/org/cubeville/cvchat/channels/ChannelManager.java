@@ -59,7 +59,8 @@ public class ChannelManager implements IPCInterface
                                           channelConfig.getBoolean("autojoin"),
                                           channelConfig.getBoolean("listable"),
                                           channelConfig.getBoolean("filtered"),
-                                          (List<String>) channelConfig.getList("commands"));
+                                          (List<String>) channelConfig.getList("commands"),
+                                          (List<String>) channelConfig.getList("users"));
             channels.put(channelName, channel);
         }
         

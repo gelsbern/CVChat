@@ -2,6 +2,7 @@ package org.cubeville.cvchat;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class ChatListener implements Listener, IPCInterface {
     private TicketManager ticketManager;
     private CVIPC cvipc;
     
-    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc) {
+    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc, List<List<String>> aliasList) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
         this.commandWhitelistTutorial = commandWhitelistTutorial;
@@ -44,19 +45,10 @@ public class ChatListener implements Listener, IPCInterface {
         this.cvipc = ipc;
         ipc.registerInterface("unlocktutorialchat", this);
         aliases = new HashMap<>();
-        aliases.put("/rg claim", "/claim"); // TODO: welp...
-        aliases.put("/region claim", "/claim");
-        aliases.put("/rg subzone", "/subzone");
-        aliases.put("/region subzone", "/subzone");
-        aliases.put("/w ", "/msg ");
-        aliases.put("/tell ", "/msg ");
-        aliases.put("/kill", "/suicide");
-        aliases.put("/instasmelt", "/smelt");
-        aliases.put("/night", "/ns");
-        aliases.put("/repair", "/rp");
-        aliases.put("/hub", "/ptp hub");
-        aliases.put("/tut", "/ptp tut");
-        aliases.put("/we cui", "/activatewecui");
+        for(List<String> alias: aliasList) {
+            if(alias.size() == 2) aliases.put(alias.get(0), alias.get(1));
+            else System.out.println("Alias count wrong!");
+        }
     }
 
     public void unlockTutorialChat(UUID playerId) {

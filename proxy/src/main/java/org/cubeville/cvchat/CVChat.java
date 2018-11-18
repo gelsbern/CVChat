@@ -3,6 +3,8 @@ package org.cubeville.cvchat;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -168,7 +170,9 @@ public class CVChat extends Plugin {
             Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
             Configuration textCommandConfig = (Configuration)config.get("textcommands");
             TextCommandManager textCommandManager = new TextCommandManager(textCommandConfig);
-            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ticketManager, ipc);
+
+            List<List<String>> aliases = (List<List<String>>)config.get("aliases");
+            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ticketManager, ipc, aliases);
             pm.registerListener(this, chatListener);
             
             pm.registerListener(this, new LoginListener(channelManager, ticketManager));

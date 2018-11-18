@@ -50,7 +50,7 @@ public class Channel
         this.filtered = filtered;
         this.commands = commands;
         this.users = users;
-
+        if(users != null && users.size() == 0) this.users = null;
         members = new HashSet<>();
 
         messageQueue = new HashMap<>();

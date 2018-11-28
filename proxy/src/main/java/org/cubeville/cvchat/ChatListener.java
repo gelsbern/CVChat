@@ -26,8 +26,10 @@ import org.cubeville.cvchat.tickets.TicketManager;
 public class ChatListener implements Listener, IPCInterface {
 
     private Channel localChannel;
-    private Set<String> commandWhitelist;
-    private Set<String> commandWhitelistTutorial;
+    //private Set<String> commandWhitelist;
+    //private Set<String> commandWhitelistTutorial;
+    private Map<String, Set<String>> commandWhitelist;
+    
     private TextCommandManager textCommandManager;
     private Set<UUID> tutorialChatUnlocked;
     private Map<String, String> aliases;
@@ -35,10 +37,9 @@ public class ChatListener implements Listener, IPCInterface {
     private TicketManager ticketManager;
     private CVIPC cvipc;
     
-    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc, List<List<String>> aliasList) {
+    public ChatListener(Channel localChannel, Map<String, Set<String>> commandWhitelist, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc, List<List<String>> aliasList) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
-        this.commandWhitelistTutorial = commandWhitelistTutorial;
         this.textCommandManager = textCommandManager;
         this.ticketManager = ticketManager;
         tutorialChatUnlocked = new HashSet<>();
@@ -92,7 +93,7 @@ public class ChatListener implements Listener, IPCInterface {
                     break;
                 }
             }
-            
+
             if(player.hasPermission("cvchat.nowhitelist")) return;
 
             String cmd = event.getMessage();
@@ -101,21 +102,27 @@ public class ChatListener implements Listener, IPCInterface {
             if(idx != -1) cmd = cmd.substring(0, idx);
             cmd = cmd.substring(1);
             cmd = cmd.toLowerCase();
-            if(commandWhitelist == null || commandWhitelistTutorial == null) {
+
+            if(commandWhitelist == null || commandWhitelist.get("tutorial") == null) {
                 player.sendMessage("§cCommand verification problems, please tell a server administrator.");
                 event.setCancelled(true);
                 return;
             }
-
-            if((finishedTutorial == true && commandWhitelist.contains(cmd)) || (commandWhitelistTutorial.contains(cmd))) {
-                return;
-            }
-            else {
-                if(finishedTutorial == false) player.sendMessage("§cYou have limited permissions, please finish the tutorial first.");
-                else player.sendMessage("§cNo permission.");
+            
+            if(finishedTutorial == false) {
+                if(commandWhitelist.get("tutorial").contains(cmd)) return;
+                player.sendMessage("§cYou have limited permissions, please finish the tutorial first.");
                 event.setCancelled(true);
                 return;
             }
+
+            for(String whitelist: commandWhitelist.keySet()) {
+                if(commandWhitelist.get(whitelist).contains(cmd) && player.hasPermission("cvchat.whitelist." + whitelist)) return;
+            }
+
+            player.sendMessage("§cNo permission.");
+            event.setCancelled(true);
+            return;
         }
         
         event.setCancelled(true);
@@ -171,9 +178,13 @@ public class ChatListener implements Listener, IPCInterface {
         else {
             if(c.startsWith("/")) {
                 c = c.substring(1);
-                for(String cmd: commandWhitelist) {
-                    if(cmd.startsWith(c)) {
-                        event.getSuggestions().add("/" + cmd + " ");
+                for(String whitelist: commandWhitelist.keySet()) {
+                    if(player.hasPermission("cvchat.whitelist." + whitelist)) {
+                        for(String cmd: commandWhitelist.get(whitelist)) {
+                            if(cmd.startsWith(c)) {
+                                event.getSuggestions().add("/" + cmd + " ");
+                            }
+                        }
                     }
                 }
             }

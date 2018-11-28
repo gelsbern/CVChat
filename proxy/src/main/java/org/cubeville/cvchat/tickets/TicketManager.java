@@ -81,7 +81,7 @@ public class TicketManager implements IPCInterface
                 final String moderatorText = ticket.getModeratorText();
                 final long ticketId = ticket.getId();
                 ProxyServer.getInstance().getScheduler().schedule(plugin, new Runnable() {
-                        public void run() { 
+                        public void run() {
                             sendPlayerNotification(playerId, "§6" + moderatorName + "§6 has completed your request while you were offline:");
                             sendPlayerNotification(playerId, "§6Request - §7" + ticketText);
                             sendPlayerNotification(playerId, "§6Mod comment - §7" + moderatorText);

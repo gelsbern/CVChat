@@ -60,7 +60,7 @@ public class Channel
 
     public void playerLogin(ProxiedPlayer player, String configuration) {
         if (viewPermission.equals("default") || player.hasPermission(viewPermission)) {
-            if(users == null || users.contains(player.getName())) {
+            if(users == null || users.contains(player.getUniqueId().toString())) {
                 if(autojoin || (configuration == null && isDefault)) {
                     members.add(player.getUniqueId());
                 }
@@ -241,7 +241,7 @@ public class Channel
         if(members.contains(player.getUniqueId())) {
             player.sendMessage("§cYou are already in that channel.");
         }
-        else if(hasViewPermission(player) && (users == null || users.contains(player.getName()))) {
+        else if(hasViewPermission(player) && (users == null || users.contains(player.getUniqueId().toString()))) {
             members.add(player.getUniqueId());
             player.sendMessage("§aYou have joined channel '" + name + "'.");
             return true;

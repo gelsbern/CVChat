@@ -19,7 +19,8 @@ public class MsgCommand extends CommandBase
 {
     private static Map<UUID, UUID> lastMessageReceived;
     private static Map<UUID, UUID> lastMessageSent;
-    private static Set<UUID> disableRefusal;
+    private static Map<UUID, Long> disableRefusal;
+    private static final long temporaryDisableTimeout = 150000;
     
     public MsgCommand() {
 
@@ -27,11 +28,28 @@ public class MsgCommand extends CommandBase
         setUsage("§c/msg <target> <message...>");
         lastMessageReceived = new HashMap<>();
         lastMessageSent = new HashMap<>();
-        disableRefusal = new HashSet<>();
+        disableRefusal = new HashMap<>();
     }
 
     public static boolean disabledRefusal(UUID player) {
-        return disableRefusal.contains(player);
+        if(!disableRefusal.keySet().contains(player)) return false;
+        if(disableRefusal.get(player) == 0) return true;
+        if(System.currentTimeMillis() - disableRefusal.get(player) > temporaryDisableTimeout) {
+            disableRefusal.remove(player);
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public static void resetTemporarilyDisabledRefusal(UUID player) {
+        if(!disableRefusal.keySet().contains(player)) return;
+        if(disableRefusal.get(player) == 0) return;
+        if(System.currentTimeMillis() - disableRefusal.get(player) > temporaryDisableTimeout)
+            disableRefusal.remove(player);
+        else
+            disableRefusal.put(player, System.currentTimeMillis());
     }
     
     public void executeC(CommandSender commandSender, String[] args) {
@@ -45,8 +63,13 @@ public class MsgCommand extends CommandBase
             }
             else if(args.length == 1) {
                 if(args[0].equals("on")) {
-                    disableRefusal.add(sender.getUniqueId());
+                    disableRefusal.put(sender.getUniqueId(), 0L);
                     sender.sendMessage("§aYou will receive private messages now.");
+                    return;
+                }
+                else if(args[0].equals("tmp")) {
+                    disableRefusal.put(sender.getUniqueId(), System.currentTimeMillis());
+                    sender.sendMessage("§aYou will receive private messages temporarily now.");
                     return;
                 }
                 else if(args[0].equals("off")) {
@@ -56,7 +79,7 @@ public class MsgCommand extends CommandBase
                 }
             }
         }
-        
+
         if(!verifyNotLessArguments(sender, args, 2)) return;
 
         boolean fakeNotFound = false;
@@ -76,15 +99,23 @@ public class MsgCommand extends CommandBase
                 return;
             }
         }
-        
-        long firstLogin = PlayerDataManager.getInstance().getFirstLogin(sender.getUniqueId());
-        if(firstLogin == 0 || System.currentTimeMillis() - firstLogin < 600000) {
+
+        long senderFirstLogin = PlayerDataManager.getInstance().getFirstLogin(sender.getUniqueId());
+        if(senderFirstLogin == 0 || System.currentTimeMillis() - senderFirstLogin < 600000) {
             if(!recipient.hasPermission("cvchat.mute.staff")) {
                 sender.sendMessage("§cNo permission.");
                 return;
             }
         }
-        
+
+        long recipientFirstLogin = PlayerDataManager.getInstance().getFirstLogin(recipient.getUniqueId());
+        if(recipientFirstLogin == 0 || System.currentTimeMillis() - recipientFirstLogin < 600000) {
+            if(!sender.hasPermission("cvchat.mute.staff")) {
+                sender.sendMessage("§cYou currently have no permission to message this player.");
+                return;
+            }
+        }
+
         sendMessage(sender, recipient, args, 1, fakeNotFound);
     }
 
@@ -101,6 +132,8 @@ public class MsgCommand extends CommandBase
             lastMessageReceived.put(sender.getUniqueId(), recipient.getUniqueId());
         }
         lastMessageReceived.put(recipient.getUniqueId(), sender.getUniqueId());
+        resetTemporarilyDisabledRefusal(sender.getUniqueId());
+        resetTemporarilyDisabledRefusal(recipient.getUniqueId());
     }
 
     protected static UUID getLastMessageReceived(UUID player) {

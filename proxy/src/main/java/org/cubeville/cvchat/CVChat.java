@@ -2,6 +2,7 @@ package org.cubeville.cvchat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -165,14 +166,20 @@ public class CVChat extends Plugin {
                 pm.registerCommand(this, new GroupCommand(group));
             }
 
-            LocalChannel local = channelManager.getLocalChannel();
-            Set<String> commandWhitelist = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("standard"));
-            Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
             Configuration textCommandConfig = (Configuration)config.get("textcommands");
             TextCommandManager textCommandManager = new TextCommandManager(textCommandConfig);
 
+            LocalChannel local = channelManager.getLocalChannel();
+            //Set<String> commandWhitelist = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("standard"));
+            //Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
+
+            Map<String, Set<String>> commandWhitelist = new HashMap<>();
+            Configuration whitelistConfig = (Configuration) config.get("whitelist");
+            for(String whitelist: whitelistConfig.getKeys()) {
+                commandWhitelist.put(whitelist, new HashSet<String>(whitelistConfig.getStringList(whitelist)));
+            }
             List<List<String>> aliases = (List<List<String>>)config.get("aliases");
-            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ticketManager, ipc, aliases);
+            ChatListener chatListener = new ChatListener(local, commandWhitelist, textCommandManager, ticketManager, ipc, aliases);
             pm.registerListener(this, chatListener);
             
             pm.registerListener(this, new LoginListener(channelManager, ticketManager));

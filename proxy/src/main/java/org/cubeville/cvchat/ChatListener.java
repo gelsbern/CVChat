@@ -2,7 +2,6 @@ package org.cubeville.cvchat;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,10 +25,8 @@ import org.cubeville.cvchat.tickets.TicketManager;
 public class ChatListener implements Listener, IPCInterface {
 
     private Channel localChannel;
-    //private Set<String> commandWhitelist;
-    //private Set<String> commandWhitelistTutorial;
-    private Map<String, Set<String>> commandWhitelist;
-    
+    private Set<String> commandWhitelist;
+    private Set<String> commandWhitelistTutorial;
     private TextCommandManager textCommandManager;
     private Set<UUID> tutorialChatUnlocked;
     private Map<String, String> aliases;
@@ -37,19 +34,28 @@ public class ChatListener implements Listener, IPCInterface {
     private TicketManager ticketManager;
     private CVIPC cvipc;
     
-    public ChatListener(Channel localChannel, Map<String, Set<String>> commandWhitelist, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc, List<List<String>> aliasList) {
+    public ChatListener(Channel localChannel, Set<String> commandWhitelist, Set<String> commandWhitelistTutorial, TextCommandManager textCommandManager, TicketManager ticketManager, CVIPC ipc) {
         this.localChannel = localChannel;
         this.commandWhitelist = commandWhitelist;
+        this.commandWhitelistTutorial = commandWhitelistTutorial;
         this.textCommandManager = textCommandManager;
         this.ticketManager = ticketManager;
         tutorialChatUnlocked = new HashSet<>();
         this.cvipc = ipc;
         ipc.registerInterface("unlocktutorialchat", this);
         aliases = new HashMap<>();
-        for(List<String> alias: aliasList) {
-            if(alias.size() == 2) aliases.put(alias.get(0), alias.get(1));
-            else System.out.println("Alias count wrong!");
-        }
+        aliases.put("/rg claim", "/claim"); // TODO: welp...
+        aliases.put("/region claim", "/claim");
+        aliases.put("/rg subzone", "/subzone");
+        aliases.put("/region subzone", "/subzone");
+        aliases.put("/w ", "/msg ");
+        aliases.put("/tell ", "/msg ");
+        aliases.put("/kill", "/suicide");
+        aliases.put("/instasmelt", "/smelt");
+        aliases.put("/night", "/ns");
+        aliases.put("/repair", "/rp");
+        aliases.put("/hub", "/ptp hub");
+        aliases.put("/tut", "/ptp tut");
     }
 
     public void unlockTutorialChat(UUID playerId) {
@@ -93,36 +99,35 @@ public class ChatListener implements Listener, IPCInterface {
                     break;
                 }
             }
-
+            
             if(player.hasPermission("cvchat.nowhitelist")) return;
 
             String cmd = event.getMessage();
 
+            if(cmd.toLowerCase().startsWith("/home")) {
+                cmd = "/home";
+                event.setMessage("/home");
+                return;
+            }
+            
             int idx = cmd.indexOf(" ");
             if(idx != -1) cmd = cmd.substring(0, idx);
             cmd = cmd.substring(1);
             cmd = cmd.toLowerCase();
-
-            if(commandWhitelist == null || commandWhitelist.get("tutorial") == null) {
+            if(commandWhitelist == null || commandWhitelistTutorial == null) {
                 player.sendMessage("§cCommand verification problems, please tell a server administrator.");
                 event.setCancelled(true);
                 return;
             }
-            
-            if(finishedTutorial == false) {
-                if(commandWhitelist.get("tutorial").contains(cmd)) return;
-                player.sendMessage("§cYou have limited permissions, please finish the tutorial first.");
+            if((finishedTutorial == true && commandWhitelist.contains(cmd)) || (commandWhitelistTutorial.contains(cmd))) {
+                return;
+            }
+            else {
+                if(finishedTutorial == false) player.sendMessage("§cYou have limited permissions, please finish the tutorial first.");
+                else player.sendMessage("§cNo permission.");
                 event.setCancelled(true);
                 return;
             }
-
-            for(String whitelist: commandWhitelist.keySet()) {
-                if(commandWhitelist.get(whitelist).contains(cmd) && player.hasPermission("cvchat.whitelist." + whitelist)) return;
-            }
-
-            player.sendMessage("§cNo permission.");
-            event.setCancelled(true);
-            return;
         }
         
         event.setCancelled(true);
@@ -178,13 +183,9 @@ public class ChatListener implements Listener, IPCInterface {
         else {
             if(c.startsWith("/")) {
                 c = c.substring(1);
-                for(String whitelist: commandWhitelist.keySet()) {
-                    if(player.hasPermission("cvchat.whitelist." + whitelist)) {
-                        for(String cmd: commandWhitelist.get(whitelist)) {
-                            if(cmd.startsWith(c)) {
-                                event.getSuggestions().add("/" + cmd + " ");
-                            }
-                        }
+                for(String cmd: commandWhitelist) {
+                    if(cmd.startsWith(c)) {
+                        event.getSuggestions().add("/" + cmd + " ");
                     }
                 }
             }

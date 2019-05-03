@@ -38,7 +38,6 @@ public class ChannelManager implements IPCInterface
 
         this.ipc = ipc;
         ipc.registerInterface("chatquery", this);
-        ipc.registerInterface("localmonitor", this); //TODO: Disable this.
             
         this.statusFolder = statusFolder;
 
@@ -59,8 +58,7 @@ public class ChannelManager implements IPCInterface
                                           channelConfig.getBoolean("autojoin"),
                                           channelConfig.getBoolean("listable"),
                                           channelConfig.getBoolean("filtered"),
-                                          (List<String>) channelConfig.getList("commands"),
-                                          (List<String>) channelConfig.getList("users"));
+                                          (List<String>) channelConfig.getList("commands"));
             channels.put(channelName, channel);
         }
         
@@ -76,16 +74,11 @@ public class ChannelManager implements IPCInterface
     }
     
     public void process(String serverName, String channel, String message) {
-        if(channel.equals("chatquery")) {
-            int idx = message.indexOf("|");
-            if(idx == -1) return;
-            String channelName = message.substring(0, idx);
-            if(channels.containsKey(channelName)) {
-                channels.get(channelName).processIpcQuery(message);
-            }
-        }
-        else if(channel.equals("localmonitor")){
-            getLocalChannel().sendMonitorMessage(serverName, message);
+        int idx = message.indexOf("|");
+        if(idx == -1) return;
+        String channelName = message.substring(0, idx);
+        if(channels.containsKey(channelName)) {
+            channels.get(channelName).processIpcQuery(message);
         }
     }
     

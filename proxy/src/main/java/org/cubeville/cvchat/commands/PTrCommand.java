@@ -12,31 +12,21 @@ public class PTrCommand extends CommandBase
         super("ptr", "cvchat.ptr");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(args.length < 2) {
-            commandSender.sendMessage("§c/ptr <player>[,player...] <message>");
+            commandSender.sendMessage("§c/ptr <player> <message>");
             return;
         }
         
-        String originalMessage = joinStrings(args, 1);
-        String message = Util.translateAlternateColorCodes(originalMessage);
-
-        String[] playerNames = args[0].split(",");
-        String notFound = "";
-        for(int i = 0; i < playerNames.length; i++) {
-            ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerNames[i]);
-            if(player == null) {
-                if(notFound.length() > 0) notFound += ", ";
-                notFound += playerNames[i];
-            }
-            else {
-                sendMessage(player, message);
-            }
+        String playerName = args[0];
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(playerName);
+        if(player == null) {
+            commandSender.sendMessage("§cPlayer not found!");
+            return;
         }
-        commandSender.sendMessage("§8ptr: §r" + message);
-
-        if(notFound.length() > 0) {
-            commandSender.sendMessage("§cPlayers not found: " + notFound);
-        }
+        
+        String message = joinStrings(args, 1);
+        message = Util.translateAlternateColorCodes(message);
+        sendMessage(player, message);
     }
 }

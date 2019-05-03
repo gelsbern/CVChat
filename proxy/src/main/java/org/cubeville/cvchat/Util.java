@@ -27,23 +27,6 @@ public class Util
         return ret;
     }
 
-    public static String[] removeEmptyStrings(String[] args) {
-        int nr = 0;
-        for(int i = 0; i < args.length; i++) {
-            if(args[i].length() > 0) nr++;
-        }
-        String ret[] = new String[nr];
-        int c = 0;
-        for(int i = 0; i < nr; i++) {
-            while(args[c].length() == 0) {
-                c++;
-            }
-            ret[i] = args[c];
-            c++;
-        }
-        return ret;
-    }
-    
     public static String removeSectionSigns(String text) {
         text.replace("§", "");
         return text;
@@ -97,7 +80,6 @@ public class Util
                 if(l == null) break;
                 ret.add(l);
             }
-            reader.close();
         }
         catch(IOException exceptin) {}
         finally {

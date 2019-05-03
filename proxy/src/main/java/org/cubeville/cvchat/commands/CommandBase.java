@@ -10,8 +10,8 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-import org.cubeville.cvchat.Util;
 import org.cubeville.cvchat.ranks.RankManager;
+
 import org.cubeville.cvchat.playerdata.PlayerDataManager;
 
 public abstract class CommandBase extends Command
@@ -30,12 +30,8 @@ public abstract class CommandBase extends Command
         this.usage = usage;
     }
     
-    public abstract void executeC(CommandSender sender, String[] args);
-    
-    public final void execute(CommandSender sender, String[] args) {
-        String[] argsC = Util.removeEmptyStrings(args);
-        executeC(sender, argsC);
-    }
+    public abstract void execute(CommandSender sender, String[] args);
+
     
     public boolean verifyPermission(CommandSender sender, String permission) {
         if(!sender.hasPermission(permission)) {

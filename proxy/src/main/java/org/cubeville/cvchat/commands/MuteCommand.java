@@ -16,7 +16,7 @@ public class MuteCommand extends CommandBase
         setUsage("§c/mute <player> [reason]");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
 

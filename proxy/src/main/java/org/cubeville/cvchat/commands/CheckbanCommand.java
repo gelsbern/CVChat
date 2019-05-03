@@ -13,7 +13,7 @@ public class CheckbanCommand extends CommandBase
         setUsage("/checkban <player>");
     }
 
-    public void executeC(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         if(!verifyNotLessArguments(sender, args, 1)) return;
         if(!verifyNotMoreArguments(sender, args, 1)) return;
 

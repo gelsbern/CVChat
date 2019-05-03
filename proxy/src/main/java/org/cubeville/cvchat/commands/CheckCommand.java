@@ -13,7 +13,7 @@ public class CheckCommand extends CommandBase
         this.ticketManager = ticketManager;
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         int page = -1;
         boolean held = false;
         boolean closed = false;

@@ -11,7 +11,7 @@ public class UnbanCommand extends CommandBase
         setUsage("/unban <player>");
     }
 
-    public void executeC(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         String senderName = getPlayerName(sender);
 
         int offset = 0;

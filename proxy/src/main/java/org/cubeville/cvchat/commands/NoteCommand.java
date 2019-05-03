@@ -26,7 +26,7 @@ public class NoteCommand extends CommandBase
         this.plugin = plugin;
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
         

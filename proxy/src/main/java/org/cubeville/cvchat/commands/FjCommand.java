@@ -14,7 +14,7 @@ public class FjCommand extends CommandBase
         super("fj", "cvchat.fakejoinquit");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         String playerName = "Console";
         if(commandSender instanceof ProxiedPlayer) playerName = ((ProxiedPlayer) commandSender).getDisplayName();
 

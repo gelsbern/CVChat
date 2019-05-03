@@ -62,17 +62,6 @@ public class RankManager
         }
         return ret;
     }
-
-    public boolean isPrefixPermitted(ProxiedPlayer player, String prefix) {
-        if(player.hasPermission("cvchat.customprefix")) return true;
-        if(prefix == "") return true;
-        for(Prefix p: prefixes.values()) {
-            if(p.getPrefix().equals(prefix)) {
-                return player.hasPermission(p.getPermission());
-            }
-        }
-        return false;
-    }
     
     private Rank getRank(ProxiedPlayer player) {
         int prio = 0;

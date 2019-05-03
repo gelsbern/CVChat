@@ -19,7 +19,7 @@ public class WhoCommand extends CommandBase
         super("who", null, "list", "playerlist", "online", "players");
     }
 
-    public void executeC(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         if(args.length > 1) {
             sender.sendMessage("§cToo many arguments.");
             sender.sendMessage("§c/who [filter]");
@@ -47,7 +47,7 @@ public class WhoCommand extends CommandBase
             }
         }
 
-        sender.sendMessage("§6Cubeville §a(" + cnt + ")§r: " + list);
+        sender.sendMessage("§6Fort Serenity §a(" + cnt + ")§r: " + list);
         
     }
 

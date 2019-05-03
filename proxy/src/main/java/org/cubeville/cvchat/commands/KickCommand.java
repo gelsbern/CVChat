@@ -12,7 +12,7 @@ public class KickCommand extends CommandBase
         setUsage("§c/kick [-s] <player> <reason>");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer sender = (ProxiedPlayer) commandSender;
         

@@ -8,7 +8,7 @@ public class ClearchatCommand extends CommandBase
         super("clearchat", "cvchat.clearchat");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         String message = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         sendMessage(getAllPlayers(), message);
     }

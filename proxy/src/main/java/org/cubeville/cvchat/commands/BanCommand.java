@@ -13,7 +13,7 @@ public class BanCommand extends CommandBase
         setUsage("/ban <player> <reason>");
     }
 
-    public void executeC(CommandSender sender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         String senderName = getPlayerName(sender);
         
         int offset = 0;

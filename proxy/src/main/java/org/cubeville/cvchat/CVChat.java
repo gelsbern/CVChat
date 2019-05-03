@@ -2,10 +2,7 @@ package org.cubeville.cvchat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +37,6 @@ import org.cubeville.cvchat.commands.GTrCommand;
 import org.cubeville.cvchat.commands.HoldCommand;
 import org.cubeville.cvchat.commands.KickCommand;
 import org.cubeville.cvchat.commands.LocalCommand;
-import org.cubeville.cvchat.commands.LocchatCommand;
 import org.cubeville.cvchat.commands.ModlistCommand;
 import org.cubeville.cvchat.commands.MsgCommand;
 import org.cubeville.cvchat.commands.MuteCommand;
@@ -60,7 +56,6 @@ import org.cubeville.cvchat.commands.UnbanCommand;
 import org.cubeville.cvchat.commands.BacksiesCommand;
 import org.cubeville.cvchat.commands.UnmuteCommand;
 import org.cubeville.cvchat.commands.WhoCommand;
-import org.cubeville.cvchat.commands.UnholdCommand;
 
 import org.cubeville.cvchat.log.Logger;
 
@@ -143,7 +138,6 @@ public class CVChat extends Plugin {
                     pm.registerCommand(this, new ReopenCommand(ticketManager));
                     pm.registerCommand(this, new TpidCommand(ticketManager));
                     pm.registerCommand(this, new BacksiesCommand(ticketManager));
-                    pm.registerCommand(this, new UnholdCommand(ticketManager));
                 }
                 else {
                     System.out.println("No ticket dao configuration found. Ticket system not available.");
@@ -166,20 +160,12 @@ public class CVChat extends Plugin {
                 pm.registerCommand(this, new GroupCommand(group));
             }
 
+            LocalChannel local = channelManager.getLocalChannel();
+            Set<String> commandWhitelist = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("standard"));
+            Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
             Configuration textCommandConfig = (Configuration)config.get("textcommands");
             TextCommandManager textCommandManager = new TextCommandManager(textCommandConfig);
-
-            LocalChannel local = channelManager.getLocalChannel();
-            //Set<String> commandWhitelist = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("standard"));
-            //Set<String> commandWhitelistTutorial = new HashSet<String>(((Configuration)config.get("whitelist")).getStringList("tutorial"));
-
-            Map<String, Set<String>> commandWhitelist = new HashMap<>();
-            Configuration whitelistConfig = (Configuration) config.get("whitelist");
-            for(String whitelist: whitelistConfig.getKeys()) {
-                commandWhitelist.put(whitelist, new HashSet<String>(whitelistConfig.getStringList(whitelist)));
-            }
-            List<List<String>> aliases = (List<List<String>>)config.get("aliases");
-            ChatListener chatListener = new ChatListener(local, commandWhitelist, textCommandManager, ticketManager, ipc, aliases);
+            ChatListener chatListener = new ChatListener(local, commandWhitelist, commandWhitelistTutorial, textCommandManager, ticketManager, ipc);
             pm.registerListener(this, chatListener);
             
             pm.registerListener(this, new LoginListener(channelManager, ticketManager));
@@ -220,7 +206,6 @@ public class CVChat extends Plugin {
                 // other commands
                 pm.registerCommand(this, new PrefixCommand());
                 pm.registerCommand(this, new LocalCommand(local));
-                pm.registerCommand(this, new LocchatCommand());
                 pm.registerCommand(this, new TrCommand());
                 pm.registerCommand(this, new PTrCommand());
                 pm.registerCommand(this, new GTrCommand());

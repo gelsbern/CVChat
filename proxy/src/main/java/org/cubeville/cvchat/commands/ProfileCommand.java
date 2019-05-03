@@ -24,7 +24,7 @@ public class ProfileCommand extends CommandBase
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
-    public void executeC(CommandSender sender, String[] args) {                                
+    public void execute(CommandSender sender, String[] args) {                                
         if(!verifyNotLessArguments(sender, args, 1)) return;
         if(!verifyNotMoreArguments(sender, args, 1)) return;
 
@@ -93,7 +93,7 @@ public class ProfileCommand extends CommandBase
             }
             lastOnline += "§r (" + dateFormat.format(new Date(lastOnlineTime)) + ")";
         }
-        final String lastOnlineMessage = "§4- §rLast on: " + lastOnline;
+        sender.sendMessage("§4- §rLast on: " + lastOnline);
         // TODO: current location
         ProxyServer.getInstance().getScheduler().runAsync(plugin, new Runnable() {
                 public void run() {
@@ -102,7 +102,6 @@ public class ProfileCommand extends CommandBase
                         String txt = "§c" + dateFormat.format(new Date(entry.getCommentTime())) + "§r " + entry.getComment() + " [" + getPDM().getPlayerName(entry.getAuthor()) + "]";
                         sender.sendMessage(txt);
                     }
-                    sender.sendMessage(lastOnlineMessage);
                 }
             });
     }

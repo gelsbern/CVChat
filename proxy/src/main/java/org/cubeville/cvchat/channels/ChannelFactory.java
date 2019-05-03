@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public class ChannelFactory
 {
-    public static Channel getChannel(String name, String type, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands, Collection<String> users) {
+    public static Channel getChannel(String name, String type, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
         if(type != null && type.equals("group")) {
             return new GroupChannel(name,
                                     viewPermission,
@@ -42,8 +42,7 @@ public class ChannelFactory
                                autojoin,
                                listable,
                                filtered,
-                               commands,
-                               users);
+                               commands);
         }
     }
 

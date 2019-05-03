@@ -16,7 +16,7 @@ public class FqCommand extends CommandBase
         super("fq", "cvchat.fakejoinquit");
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         String playerName = "Console";
         if(commandSender instanceof ProxiedPlayer) playerName = ((ProxiedPlayer) commandSender).getDisplayName();
 

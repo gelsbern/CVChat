@@ -60,9 +60,9 @@ public class TicketManager implements IPCInterface
                                        loctk.nextToken(), Integer.valueOf(loctk.nextToken()), Integer.valueOf(loctk.nextToken()), Integer.valueOf(loctk.nextToken()),
                                        System.currentTimeMillis());
             tickets.add(ticket);
-            int ticketId = dao.createTicket(ticket);
+            dao.createTicket(ticket);
             player.sendMessage("§6Thank you. Your message has been sent. A moderator should be with you shortly.");
-            sendNotification("§6New mod request #" + ticketId + " filed; use /check for more.");
+            sendNotification("§aNew mod request filed; use /check for more.");
             updateOpenTicketPlayerList();
         }
         catch(RuntimeException e) {
@@ -81,7 +81,7 @@ public class TicketManager implements IPCInterface
                 final String moderatorText = ticket.getModeratorText();
                 final long ticketId = ticket.getId();
                 ProxyServer.getInstance().getScheduler().schedule(plugin, new Runnable() {
-                        public void run() {
+                        public void run() { 
                             sendPlayerNotification(playerId, "§6" + moderatorName + "§6 has completed your request while you were offline:");
                             sendPlayerNotification(playerId, "§6Request - §7" + ticketText);
                             sendPlayerNotification(playerId, "§6Mod comment - §7" + moderatorText);
@@ -163,10 +163,10 @@ public class TicketManager implements IPCInterface
             }
         }
         if(cnt == -1) {
-            String msg = "No open open modreqs. Also there are no closed open and no open closed modreqs.";
-            if(held) msg = "No held modreqs.";
-            if(closed) msg = "No closed modreqs.";
-            sender.sendMessage(msg);
+            String type = "open";
+            if(held) type = "held";
+            if(closed) type = "closed";
+            sender.sendMessage("No " + type + " open modreqs.");
             return;
         }
         int from = page * 5 - 4;
@@ -195,11 +195,10 @@ public class TicketManager implements IPCInterface
         }
 
         sender.sendMessage("§eFiled by §c" + ticket.getPlayerName() + "§e at " + getDateStr(ticket.getCreationTimestamp()) + "§e at " + ticket.getServer() + "," + ticket.getWorld() + "," + ticket.getX() + "," + ticket.getY() + "," + ticket.getZ());
-        if(!ticket.isClosed() && ticket.isClaimed()) {
-            sender.sendMessage("§eClaimed by §d" + ticket.getModeratorName() + "§e at §d" + getDateStr(ticket.getModeratorTimestamp()));
-        }
-        else if(ticket.isClosed()) {
+        if(ticket.isClaimed() || ticket.isClosed()) {
             sender.sendMessage("§eHandled by §d" + ticket.getModeratorName() + "§e at §d" + getDateStr(ticket.getModeratorTimestamp()));
+        }
+        if(ticket.isClosed()) {
             sender.sendMessage("§6Mod comment - §7" + ticket.getModeratorText());
         }
         sender.sendMessage("§7" + ticket.getText());
@@ -239,13 +238,7 @@ public class TicketManager implements IPCInterface
         updateTicketAsync(ticket);
 
         sendNotification("§6" + player.getName() + "§6 calls dibs on request #" + ticket.getId() + ".");
-        
-        if(Util.playerIsHidden(player)) {
-            sendPlayerNotification(ticket.getPlayer(), "§6Your request is being handled.");
-        }
-        else {
-            sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 is now handling your request.");
-        }
+        sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 is now handling your request.");
     }
 
     public void closeTicket(CommandSender sender, int ticketId, String text) {
@@ -271,14 +264,7 @@ public class TicketManager implements IPCInterface
 
         sendNotification("§6Request #" + ticket.getId() + " has been completed.");
         sendNotification("§6Mod comment - §7" + text);
-        
-        if(Util.playerIsHidden(player)) {
-            sendPlayerNotification(ticket.getPlayer(), "§6Your request has been completed.");
-        }
-        else {
-            sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 has completed your request.");
-        }
-        
+        sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 has completed your request.");
         if(sendPlayerNotification(ticket.getPlayer(), "§6Mod comment - §7" + text)) {
             ticket.setPlayerNotified(true);
         }
@@ -343,13 +329,7 @@ public class TicketManager implements IPCInterface
         updateTicketAsync(ticket);
 
         sendNotification("§6Request #" + ticket.getId() + " is no longer assigned.");
-        
-        if(Util.playerIsHidden(player)) {
-            sendPlayerNotification(ticket.getPlayer(), "§6Your request is no longer being handled.");
-        }
-        else {
-            sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 is no longer handling your request. Please wait for another mod.");
-        }
+        sendPlayerNotification(ticket.getPlayer(), "§6" + player.getName() + "§6 is no longer handling your request. Please wait for another mod.");
     }
 
     public void holdTicket(CommandSender sender, int ticketId) {
@@ -381,37 +361,6 @@ public class TicketManager implements IPCInterface
         updateTicketAsync(ticket);
 
         sendNotification("§6Request #" + ticket.getId() + " is now on hold.");
-    }
-    
-    public void unholdTicket(CommandSender sender, int ticketId) {
-        if(!(sender instanceof ProxiedPlayer)) return;
-        ProxiedPlayer player = (ProxiedPlayer) sender;
-        
-        Ticket ticket = getTicketById(ticketId);
-        if(ticket == null) {
-            player.sendMessage("§cInvalid ticket id.");
-            return;
-        }
-        
-        if(ticket.isClosed()) {
-          player.sendMessage("§cTicket is closed, cannot hold");
-          return;
-        }
-        
-        if(!(ticket.isHeld())) {
-          player.sendMessage("§cTicket is not held.");
-          return;
-        }
-        
-        ticket.setHeld(false);
-        ticket.setClaimed(false);
-        ticket.setModerator(player.getUniqueId());
-        ticket.setModeratorName(player.getName());
-        ticket.setModeratorTimestamp(System.currentTimeMillis());
-        updateOpenTicketPlayerList();
-        updateTicketAsync(ticket);
-        
-        sendNotification("§6Request #" + ticket.getId() + " removed from the hold list.");
     }
     
     public void tpid(CommandSender sender, int ticketId) {
@@ -453,6 +402,6 @@ public class TicketManager implements IPCInterface
     }
 
     public Set<String> getOpenTicketPlayerList() {
-        return new HashSet<String>(openTicketPlayerList);
+        return openTicketPlayerList;
     }
 }

@@ -12,7 +12,7 @@ public class ForwardCommand extends CommandBase
         this.forwardCommand = forwardCommand;
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(!(commandSender instanceof ProxiedPlayer)) return;
         ProxiedPlayer player = (ProxiedPlayer) commandSender;
         player.chat(forwardCommand);

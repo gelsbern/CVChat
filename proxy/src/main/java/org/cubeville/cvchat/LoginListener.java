@@ -3,8 +3,6 @@ package org.cubeville.cvchat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import net.md_5.bungee.api.ProxyServer;
@@ -29,26 +27,25 @@ public class LoginListener implements Listener
 {
     ChannelManager channelManager;
     TicketManager ticketManager;
-
-    Map<UUID, Long> newPlayerLogins;
     
     public LoginListener(ChannelManager channelManager, TicketManager ticketManager) {
         this.channelManager = channelManager;
         this.ticketManager = ticketManager;
-        newPlayerLogins = new HashMap<>();
     }
 
     @EventHandler
     public void onPreLogin(final PreLoginEvent event) {
         String playerName = event.getConnection().getName();
+        if(!(playerName.equals("FrediW") || playerName.equals("deanwin"))) {
+            event.setCancelReason("§cSorry, the server is under maintenance.\n§cPlease come back a little later!");
+        }
         int protocolVersion = event.getConnection().getVersion();
         if(protocolVersion != 340) {
             event.setCancelled(true);
             String currentVersion = "Undeterminable";
-            if(protocolVersion > 340) currentVersion = "1.13 or newer";
-            if(protocolVersion < 340) currentVersion = "1.12.1/1.11 or older";
-            event.setCancelReason("§cPlease use §aMinecraft v1.12.2 §cfor Cubeville.\nYou're currently using: §e" + currentVersion);
-            return;
+            if(protocolVersion >= 335) currentVersion = "1.13 or newer";
+            if(protocolVersion <= 210) currentVersion = "1.11 or older";
+            event.setCancelReason("§cPlease use §aMinecraft v1.12.2 §cfor Fort Serenity.\nYou're currently using: §e" + currentVersion);
         }
         Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
         for(ProxiedPlayer p: players) {
@@ -60,47 +57,22 @@ public class LoginListener implements Listener
         }
     }
 
-    private int newPlayerLoginCount(int Time) {
-        int ret = 0;
-        long currentTime = System.currentTimeMillis();
-        for(UUID p: newPlayerLogins.keySet()) {
-            long tdiff = currentTime - newPlayerLogins.get(p);
-            if(tdiff < Time) ret++;
-        }
-        return ret;
-    }
-    
     @EventHandler
-    public void onLogin(final LoginEvent event) {
+    public void onLogin(final LoginEvent event) {        
         PlayerDataManager pdm = PlayerDataManager.getInstance();
         PendingConnection connection = event.getConnection();
-        UUID uuid = connection.getUniqueId();
-
-        if(!pdm.isPlayerKnown(uuid)) {
-            // Count number of new players in last two minutes
-            int c2min = newPlayerLoginCount(120000);
-            int c10min = newPlayerLoginCount(600000);
-            System.out.println("New player " + uuid + " logging in. 2 min cnt = " + c2min + ", 10 min cnt = " + c10min);
-            if(c2min >= 4 || c10min >= 8) {
-                event.setCancelled(true);
-                event.setCancelReason("§cSorry, all login slots are currently occupied.\n§cPlease try again in a few minutes.");
-                System.out.println("Login denied for player " + uuid + ", 2 minute login count: " + c2min + ", 10 minute count: " + c10min);
-                return;
-            }
-            System.out.println("Access granted at " + System.currentTimeMillis() + ".");
-        }
-
-        if(pdm.isBanned(uuid, true)) {
+        if(pdm.isBanned(connection.getUniqueId(), true)) {
             event.setCancelled(true);
             boolean perm = pdm.isPermanentlyBanned(connection.getUniqueId());
             String type = perm ? "permanently" : "temporarily";
             String endOfBan = "";
             if(!perm) {
                 SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss z");
-                endOfBan = " until §e" + sdf.format(new Date(pdm.getEndOfTempban(uuid)));
+                endOfBan = " until §e" + sdf.format(new Date(pdm.getEndOfTempban(connection.getUniqueId())));
             }
-            event.setCancelReason("§cYou're " + type + " banned from this server" + endOfBan + ".\n§cReason: §e" + pdm.getBanReason(uuid));
+            event.setCancelReason("§cYou're " + type + " banned from this server" + endOfBan + ".\n§cReason: §e" + pdm.getBanReason(connection.getUniqueId()));
         }
+
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -110,16 +82,12 @@ public class LoginListener implements Listener
         
         PlayerDataManager pdm = PlayerDataManager.getInstance();
         UUID playerId = player.getUniqueId();
-
-        boolean newPlayer = false;
         
         if(!player.hasPermission("cvchat.silent.join")) {
             if(!pdm.isPlayerKnown(playerId)) {
-                newPlayer = true;
                 sendWelcomeMessage(player.getName());
                 pdm.addPlayer(playerId, player.getName(), getStrippedIpAddress(player));
                 sendMessage(player.getDisplayName(), "joined");
-                newPlayerLogins.put(playerId, System.currentTimeMillis());
             }
             else {
                 if(pdm.getPlayerName(playerId).equals(player.getName())) {
@@ -155,11 +123,7 @@ public class LoginListener implements Listener
             }
         }
 
-        if(!RankManager.getInstance().isPrefixPermitted(player, pdm.getPrefix(playerId))) {
-            pdm.changePrefix(playerId, "");
-        }
-        
-        System.out.println("Player " + player.getName() + " logged in" + (newPlayer ? " for the first time." : "."));
+        System.out.println("Player " + player.getName() + " logged in.");
     }
 
     private String getStrippedIpAddress(ProxiedPlayer player) {
@@ -211,7 +175,7 @@ public class LoginListener implements Listener
     
     private void sendWelcomeMessage(String playerName) {
         for(ProxiedPlayer p: ProxyServer.getInstance().getPlayers()) {
-            p.sendMessage("§eEveryone welcome Cubeville's newest player, " + playerName + "§e!");
+            p.sendMessage("§eEveryone welcome Fort Serenity's newest player, " + playerName + "§e!");
         }        
     }
 }

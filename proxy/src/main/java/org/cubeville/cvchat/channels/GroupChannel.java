@@ -22,7 +22,7 @@ public class GroupChannel extends Channel
     private static Map<UUID, UUID> invitations; // Key = invited player, value = inviting player
     
     public GroupChannel(String name, String viewPermission, String sendPermission, String colorPermission, String leavePermission, String format, boolean isDefault, boolean autojoin, boolean listable, boolean filtered, Collection<String> commands) {
-        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, filtered, commands, null);
+        super(name, viewPermission, sendPermission, colorPermission, leavePermission, format, isDefault, autojoin, listable, filtered, commands);
 
         groupMembership = new HashMap<>();
         groupMembers = new HashMap<>();

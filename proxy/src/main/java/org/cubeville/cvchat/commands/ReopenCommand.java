@@ -13,7 +13,7 @@ public class ReopenCommand extends CommandBase
         this.ticketManager = ticketManager;
     }
 
-    public void executeC(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender commandSender, String[] args) {
         if(args.length == 1) {
             try {
                 int id = Integer.valueOf(args[0]);
